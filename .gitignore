@@ -1,0 +1,37 @@
+# -----------------------------------
+# OS X
+# -----------------------------------
+
+# Directory files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnail files
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# -----------------------------------
+# Folders
+# -----------------------------------
+
+/dist
+/node_modules
+/pkg
+/target
+
+# -----------------------------------
+# Files
+# -----------------------------------
+
+*.db
