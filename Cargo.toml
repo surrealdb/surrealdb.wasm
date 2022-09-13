@@ -1,0 +1,29 @@
+[package]
+name = "surrealdb"
+publish = false
+edition = "2021"
+version = "0.0.0"
+authors = ["Tobie Morgan Hitchcock <tobie@surrealdb.com>"]
+
+[profile.release]
+lto = true
+strip = true
+opt-level = 'z'
+panic = 'abort'
+codegen-units = 1
+
+[lib]
+name = "surrealdb"
+crate-type = ["cdylib"]
+
+[dependencies]
+chrono = { version = "0.4.22", features = ["serde", "wasmbind"] }
+fern = "0.6.1"
+getrandom = { version = "0.2.7", features = ["js"] }
+js-sys = "0.3.60"
+log = "0.4.17"
+surrealdb = { version = "1.0.0-beta.7", path = "../surrealdb/lib", default-features = false, features = ["kv-mem", "kv-indxdb", "http"] }
+thiserror = "1.0.35"
+wasm-bindgen = { version = "0.2.83", features = ["serde-serialize"] }
+wasm-bindgen-futures = "0.4.33"
+web-sys = { version = "0.3.60", features = ["console"] }
