@@ -43,7 +43,7 @@ impl Surreal {
 					let v = Rc::new(RwLock::new(Remote::new(url)));
 					Kind::Remote(v)
 				}
-				s if s.starts_with("ixdb:") => {
+				s if s.starts_with("indxdb:") => {
 					let v = Rc::new(RwLock::new(Local::new(url)));
 					Kind::Local(v)
 				}
@@ -72,7 +72,7 @@ impl Surreal {
 				self.kind = Kind::Remote(v);
 				Promise::resolve(&JsValue::NULL)
 			}
-			s if s.starts_with("ixdb:") => {
+			s if s.starts_with("indxdb:") => {
 				let v = Rc::new(RwLock::new(Local::new(url)));
 				self.kind = Kind::Local(v);
 				Promise::resolve(&JsValue::NULL)
