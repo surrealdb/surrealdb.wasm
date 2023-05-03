@@ -1,21 +1,28 @@
-use surrealdb::Error as DBError;
-use thiserror::Error;
 use wasm_bindgen::JsValue;
 
-#[derive(Error, Debug)]
-pub enum Error {
-	#[error("{0}")]
-	DBError(#[from] DBError),
-
-	#[error("Invalid URL")]
-	InvalidUrl,
-
-	#[error("You need to instantiate this instance using the init(url) method")]
-	MustInstantiate,
-}
+#[derive(Debug)]
+pub struct Error(JsValue);
 
 impl From<Error> for JsValue {
-	fn from(v: Error) -> Self {
-		JsValue::from(v.to_string())
+	fn from(Error(value): Error) -> Self {
+		value
+	}
+}
+
+impl From<surrealdb::Error> for Error {
+	fn from(v: surrealdb::Error) -> Self {
+		Self(JsValue::from(v.to_string()))
+	}
+}
+
+impl From<serde_wasm_bindgen::Error> for Error {
+	fn from(v: serde_wasm_bindgen::Error) -> Self {
+		Self(JsValue::from(v.to_string()))
+	}
+}
+
+impl From<&str> for Error {
+	fn from(v: &str) -> Self {
+		Self(JsValue::from(v))
 	}
 }

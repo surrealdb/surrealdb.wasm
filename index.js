@@ -2,17 +2,10 @@ export default import(/* webpackChunkName: "surrealdb" */ './pkg/surrealdb.js').
 
 	Object.defineProperty(module.Surreal, 'ENDPOINTS', {
 		value: {
-			"AS": "wss://cloud.as.surrealdb.com/rpc",
-			"EU": "wss://cloud.eu.surrealdb.com/rpc",
-			"US": "wss://cloud.us.surrealdb.com/rpc",
+			"AS": "wss://cloud.as.surrealdb.com",
+			"EU": "wss://cloud.eu.surrealdb.com",
+			"US": "wss://cloud.us.surrealdb.com",
 		},
-		writable: false,
-		enumerable: false,
-		configurable: false,
-	});
-
-	Object.defineProperty(module.Surreal, 'Instance', {
-		value: new module.Surreal(),
 		writable: false,
 		enumerable: false,
 		configurable: false,
