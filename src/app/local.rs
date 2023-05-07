@@ -4,10 +4,10 @@ use std::collections::BTreeMap;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::RwLock;
+use surrealdb::dbs::Auth;
+use surrealdb::dbs::Session;
+use surrealdb::kvs::Datastore;
 use surrealdb::sql::Value;
-use surrealdb::Auth;
-use surrealdb::Datastore;
-use surrealdb::Session;
 use wasm_bindgen::JsError;
 use wasm_bindgen::JsValue;
 
@@ -81,232 +81,161 @@ impl Local {
 		Ok(JsValue::NULL)
 	}
 
-	pub async fn select(
-		this: Rc<RwLock<Self>>,
-		table: Option<String>,
-		thing: Option<String>,
-	) -> Result<JsValue, JsValue> {
+	pub async fn select(this: Rc<RwLock<Self>>, what: JsValue) -> Result<JsValue, JsValue> {
 		// Fetch the datastore instance
 		let kvs = Local::init(&this).await?;
+		// Convert the input to SurrealQL
+		let what: Value = what.convert();
 		// Clone the current session data
 		let sess = this.read().unwrap().session.clone();
-		// Perform the query
-		match table {
-			Some(table) => match thing {
-				Some(id) => {
-					let text = format!("SELECT * FROM type::thing($tb, $id)");
-					let vars = map! {
-						String::from("tb") => Value::from(table),
-						String::from("id") => Value::from(id),
-					};
-					match kvs.execute(&text, &sess, Some(vars), false).await {
-						Ok(v) => match v.first().unwrap().output() {
-							Ok(v) => Ok(JsValue::from_serde(v.single()).unwrap()),
-							Err(e) => Err(JsError::new(e.to_string().as_str()).into()),
-						},
-						Err(e) => Err(JsError::from(e).into()),
-					}
-				}
-				None => {
-					let text = format!("SELECT * FROM type::table($tb)");
-					let vars = map! {
-						String::from("tb") => Value::from(table),
-					};
-					match kvs.execute(&text, &sess, Some(vars), false).await {
-						Ok(v) => match v.first().unwrap().output() {
-							Ok(v) => Ok(JsValue::from_serde(v).unwrap()),
-							Err(e) => Err(JsError::new(e.to_string().as_str()).into()),
-						},
-						Err(e) => Err(JsError::from(e).into()),
-					}
-				}
+		// Specify the SQL query string
+		let text = format!("SELECT * FROM $what");
+		// Specify the query parameters
+		let vars = Some(map! {
+			String::from("what") => what.could_be_table(),
+		});
+		// Execute the query on the database
+		match kvs.execute(&text, &sess, vars, false).await {
+			Ok(mut v) => match v.swap_remove(1).output() {
+				Ok(v) => Ok(JsValue::from_serde(&v.first()).unwrap()),
+				Err(e) => Err(JsError::new(e.to_string().as_str()).into()),
 			},
-			None => Err(JsValue::from("Specify a table")),
+			Err(e) => Err(JsError::from(e).into()),
 		}
 	}
 
 	pub async fn create(
 		this: Rc<RwLock<Self>>,
-		table: Option<String>,
-		thing: Option<String>,
+		what: JsValue,
 		data: JsValue,
 	) -> Result<JsValue, JsValue> {
 		// Fetch the datastore instance
 		let kvs = Local::init(&this).await?;
+		// Convert the input to SurrealQL
+		let what: Value = what.convert();
 		// Clone the current session data
 		let sess = this.read().unwrap().session.clone();
-		// Perform the query
-		match table {
-			Some(table) => match thing {
-				Some(id) => {
-					let text = format!("CREATE type::thing($tb, $id) CONTENT $data");
-					let vars = map! {
-						String::from("tb") => Value::from(table),
-						String::from("id") => Value::from(id),
-						String::from("data") => data.convert(),
-					};
-					match kvs.execute(&text, &sess, Some(vars), false).await {
-						Ok(v) => match v.first().unwrap().output() {
-							Ok(v) => Ok(JsValue::from_serde(v.single()).unwrap()),
-							Err(e) => Err(JsError::new(e.to_string().as_str()).into()),
-						},
-						Err(e) => Err(JsError::from(e).into()),
-					}
-				}
-				None => {
-					let text = format!("CREATE type::table($tb) CONTENT $data");
-					let vars = map! {
-						String::from("tb") => Value::from(table),
-						String::from("data") => data.convert(),
-					};
-					match kvs.execute(&text, &sess, Some(vars), false).await {
-						Ok(v) => match v.first().unwrap().output() {
-							Ok(v) => Ok(JsValue::from_serde(v.single()).unwrap()),
-							Err(e) => Err(JsError::new(e.to_string().as_str()).into()),
-						},
-						Err(e) => Err(JsError::from(e).into()),
-					}
-				}
+		// Specify the SQL query string
+		let text = format!("CREATE $what CONTENT $data");
+		// Specify the query parameters
+		let vars = Some(map! {
+			String::from("what") => what.could_be_table(),
+			String::from("data") => data.convert(),
+		});
+		// Execute the query on the database
+		match kvs.execute(&text, &sess, vars, false).await {
+			Ok(mut v) => match v.swap_remove(1).output() {
+				Ok(v) => Ok(JsValue::from_serde(&v.first()).unwrap()),
+				Err(e) => Err(JsError::new(e.to_string().as_str()).into()),
 			},
-			None => Err(JsValue::from("Specify a table")),
+			Err(e) => Err(JsError::from(e).into()),
 		}
 	}
 
 	pub async fn update(
 		this: Rc<RwLock<Self>>,
-		table: Option<String>,
-		thing: Option<String>,
+		what: JsValue,
 		data: JsValue,
 	) -> Result<JsValue, JsValue> {
 		// Fetch the datastore instance
 		let kvs = Local::init(&this).await?;
+		// Convert the input to SurrealQL
+		let what: Value = what.convert();
 		// Clone the current session data
 		let sess = this.read().unwrap().session.clone();
-		// Perform the query
-		match table {
-			Some(table) => match thing {
-				Some(id) => {
-					let text = format!("UPDATE type::thing($tb, $id) CONTENT $data");
-					let vars = map! {
-						String::from("tb") => Value::from(table),
-						String::from("id") => Value::from(id),
-						String::from("data") => data.convert(),
-					};
-					match kvs.execute(&text, &sess, Some(vars), false).await {
-						Ok(v) => match v.first().unwrap().output() {
-							Ok(v) => Ok(JsValue::from_serde(v.single()).unwrap()),
-							Err(e) => Err(JsError::new(e.to_string().as_str()).into()),
-						},
-						Err(e) => Err(JsError::from(e).into()),
-					}
-				}
-				None => {
-					let text = format!("UPDATE type::table($tb) CONTENT $data");
-					let vars = map! {
-						String::from("tb") => Value::from(table),
-						String::from("data") => data.convert(),
-					};
-					match kvs.execute(&text, &sess, Some(vars), false).await {
-						Ok(v) => match v.first().unwrap().output() {
-							Ok(v) => Ok(JsValue::from_serde(v).unwrap()),
-							Err(e) => Err(JsError::new(e.to_string().as_str()).into()),
-						},
-						Err(e) => Err(JsError::from(e).into()),
-					}
-				}
+		// Specify the SQL query string
+		let text = format!("UPDATE $what CONTENT $data");
+		// Specify the query parameters
+		let vars = Some(map! {
+			String::from("what") => what.could_be_table(),
+			String::from("data") => data.convert(),
+		});
+		// Execute the query on the database
+		match kvs.execute(&text, &sess, vars, false).await {
+			Ok(mut v) => match v.swap_remove(1).output() {
+				Ok(v) => Ok(JsValue::from_serde(&v.first()).unwrap()),
+				Err(e) => Err(JsError::new(e.to_string().as_str()).into()),
 			},
-			None => Err(JsValue::from("Specify a table")),
+			Err(e) => Err(JsError::from(e).into()),
 		}
 	}
 
-	pub async fn modify(
+	pub async fn merge(
 		this: Rc<RwLock<Self>>,
-		table: Option<String>,
-		thing: Option<String>,
+		what: JsValue,
 		data: JsValue,
 	) -> Result<JsValue, JsValue> {
 		// Fetch the datastore instance
 		let kvs = Local::init(&this).await?;
+		// Convert the input to SurrealQL
+		let what: Value = what.convert();
 		// Clone the current session data
 		let sess = this.read().unwrap().session.clone();
-		// Perform the query
-		match table {
-			Some(table) => match thing {
-				Some(id) => {
-					let text = format!("UPDATE type::thing($tb, $id) MERGE $data");
-					let vars = map! {
-						String::from("tb") => Value::from(table),
-						String::from("id") => Value::from(id),
-						String::from("data") => data.convert(),
-					};
-					match kvs.execute(&text, &sess, Some(vars), false).await {
-						Ok(v) => match v.first().unwrap().output() {
-							Ok(v) => Ok(JsValue::from_serde(v.single()).unwrap()),
-							Err(e) => Err(JsError::new(e.to_string().as_str()).into()),
-						},
-						Err(e) => Err(JsError::from(e).into()),
-					}
-				}
-				None => {
-					let text = format!("UPDATE type::table($tb) MERGE $data");
-					let vars = map! {
-						String::from("tb") => Value::from(table),
-						String::from("data") => data.convert(),
-					};
-					match kvs.execute(&text, &sess, Some(vars), false).await {
-						Ok(v) => match v.first().unwrap().output() {
-							Ok(v) => Ok(JsValue::from_serde(v).unwrap()),
-							Err(e) => Err(JsError::new(e.to_string().as_str()).into()),
-						},
-						Err(e) => Err(JsError::from(e).into()),
-					}
-				}
+		// Specify the SQL query string
+		let text = format!("UPDATE $what MERGE $data");
+		// Specify the query parameters
+		let vars = Some(map! {
+			String::from("what") => what.could_be_table(),
+			String::from("data") => data.convert(),
+		});
+		// Execute the query on the database
+		match kvs.execute(&text, &sess, vars, false).await {
+			Ok(mut v) => match v.swap_remove(1).output() {
+				Ok(v) => Ok(JsValue::from_serde(&v.first()).unwrap()),
+				Err(e) => Err(JsError::new(e.to_string().as_str()).into()),
 			},
-			None => Err(JsValue::from("Specify a table")),
+			Err(e) => Err(JsError::from(e).into()),
 		}
 	}
 
-	pub async fn delete(
+	pub async fn patch(
 		this: Rc<RwLock<Self>>,
-		table: Option<String>,
-		thing: Option<String>,
+		what: JsValue,
+		data: JsValue,
 	) -> Result<JsValue, JsValue> {
 		// Fetch the datastore instance
 		let kvs = Local::init(&this).await?;
+		// Convert the input to SurrealQL
+		let what: Value = what.convert();
 		// Clone the current session data
 		let sess = this.read().unwrap().session.clone();
-		// Perform the query
-		match table {
-			Some(table) => match thing {
-				Some(id) => {
-					let text = format!("DELETE type::thing($tb, $id)");
-					let vars = map! {
-						String::from("tb") => Value::from(table),
-						String::from("id") => Value::from(id),
-					};
-					match kvs.execute(&text, &sess, Some(vars), false).await {
-						Ok(v) => match v.first().unwrap().output() {
-							Ok(v) => Ok(JsValue::from_serde(v.single()).unwrap()),
-							Err(e) => Err(JsError::new(e.to_string().as_str()).into()),
-						},
-						Err(e) => Err(JsError::from(e).into()),
-					}
-				}
-				None => {
-					let text = format!("DELETE type::table($tb)");
-					let vars = map! {
-						String::from("tb") => Value::from(table),
-					};
-					match kvs.execute(&text, &sess, Some(vars), false).await {
-						Ok(v) => match v.first().unwrap().output() {
-							Ok(v) => Ok(JsValue::from_serde(v).unwrap()),
-							Err(e) => Err(JsError::new(e.to_string().as_str()).into()),
-						},
-						Err(e) => Err(JsError::from(e).into()),
-					}
-				}
+		// Specify the SQL query string
+		let text = format!("UPDATE $what PATCH $data");
+		// Specify the query parameters
+		let vars = Some(map! {
+			String::from("what") => what.could_be_table(),
+			String::from("data") => data.convert(),
+		});
+		// Execute the query on the database
+		match kvs.execute(&text, &sess, vars, false).await {
+			Ok(mut v) => match v.swap_remove(1).output() {
+				Ok(v) => Ok(JsValue::from_serde(&v.first()).unwrap()),
+				Err(e) => Err(JsError::new(e.to_string().as_str()).into()),
 			},
-			None => Err(JsValue::from("Specify a table")),
+			Err(e) => Err(JsError::from(e).into()),
+		}
+	}
+
+	pub async fn delete(this: Rc<RwLock<Self>>, what: JsValue) -> Result<JsValue, JsValue> {
+		// Fetch the datastore instance
+		let kvs = Local::init(&this).await?;
+		// Convert the input to SurrealQL
+		let what: Value = what.convert();
+		// Clone the current session data
+		let sess = this.read().unwrap().session.clone();
+		// Specify the SQL query string
+		let text = format!("DELETE $what");
+		// Specify the query parameters
+		let vars = Some(map! {
+			String::from("what") => what.could_be_table(),
+		});
+		// Execute the query on the database
+		match kvs.execute(&text, &sess, vars, false).await {
+			Ok(mut v) => match v.swap_remove(1).output() {
+				Ok(v) => Ok(JsValue::from_serde(&v.first()).unwrap()),
+				Err(e) => Err(JsError::new(e.to_string().as_str()).into()),
+			},
+			Err(e) => Err(JsError::from(e).into()),
 		}
 	}
 }

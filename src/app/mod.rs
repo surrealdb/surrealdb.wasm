@@ -171,46 +171,55 @@ impl Surreal {
 	}
 
 	#[wasm_bindgen]
-	pub fn select(&self, table: Option<String>, thing: Option<String>) -> Promise {
+	pub fn select(&self, what: JsValue) -> Promise {
 		match &self.kind {
 			Kind::None => Promise::reject(&JsValue::from(Error::MustInstantiate)),
-			Kind::Local(v) => future_to_promise(Local::select(v.clone(), table, thing)),
+			Kind::Local(v) => future_to_promise(Local::select(v.clone(), what)),
 			Kind::Remote(_) => todo!(),
 		}
 	}
 
 	#[wasm_bindgen]
-	pub fn create(&self, table: Option<String>, thing: Option<String>, data: JsValue) -> Promise {
+	pub fn create(&self, what: JsValue, data: JsValue) -> Promise {
 		match &self.kind {
 			Kind::None => Promise::reject(&JsValue::from(Error::MustInstantiate)),
-			Kind::Local(v) => future_to_promise(Local::create(v.clone(), table, thing, data)),
+			Kind::Local(v) => future_to_promise(Local::create(v.clone(), what, data)),
 			Kind::Remote(_) => todo!(),
 		}
 	}
 
 	#[wasm_bindgen]
-	pub fn update(&self, table: Option<String>, thing: Option<String>, data: JsValue) -> Promise {
+	pub fn update(&self, what: JsValue, data: JsValue) -> Promise {
 		match &self.kind {
 			Kind::None => Promise::reject(&JsValue::from(Error::MustInstantiate)),
-			Kind::Local(v) => future_to_promise(Local::update(v.clone(), table, thing, data)),
+			Kind::Local(v) => future_to_promise(Local::update(v.clone(), what, data)),
 			Kind::Remote(_) => todo!(),
 		}
 	}
 
 	#[wasm_bindgen]
-	pub fn modify(&self, table: Option<String>, thing: Option<String>, data: JsValue) -> Promise {
+	pub fn merge(&self, what: JsValue, data: JsValue) -> Promise {
 		match &self.kind {
 			Kind::None => Promise::reject(&JsValue::from(Error::MustInstantiate)),
-			Kind::Local(v) => future_to_promise(Local::modify(v.clone(), table, thing, data)),
+			Kind::Local(v) => future_to_promise(Local::merge(v.clone(), what, data)),
 			Kind::Remote(_) => todo!(),
 		}
 	}
 
 	#[wasm_bindgen]
-	pub fn delete(&self, table: Option<String>, thing: Option<String>) -> Promise {
+	pub fn patch(&self, what: JsValue, data: JsValue) -> Promise {
 		match &self.kind {
 			Kind::None => Promise::reject(&JsValue::from(Error::MustInstantiate)),
-			Kind::Local(v) => future_to_promise(Local::delete(v.clone(), table, thing)),
+			Kind::Local(v) => future_to_promise(Local::patch(v.clone(), what, data)),
+			Kind::Remote(_) => todo!(),
+		}
+	}
+
+	#[wasm_bindgen]
+	pub fn delete(&self, what: JsValue) -> Promise {
+		match &self.kind {
+			Kind::None => Promise::reject(&JsValue::from(Error::MustInstantiate)),
+			Kind::Local(v) => future_to_promise(Local::delete(v.clone(), what)),
 			Kind::Remote(_) => todo!(),
 		}
 	}

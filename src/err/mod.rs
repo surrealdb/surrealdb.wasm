@@ -1,4 +1,4 @@
-use surrealdb::Error as DBError;
+use surrealdb::err::Error as DBError;
 use thiserror::Error;
 use wasm_bindgen::JsValue;
 
