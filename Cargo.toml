@@ -17,25 +17,13 @@ name = "surrealdb"
 crate-type = ["cdylib"]
 
 [dependencies]
-chrono = { version = "0.4.24", features = ["serde", "wasmbind"] }
-fern = "0.6.2"
-getrandom = { version = "0.2.9", features = ["js"] }
-js-sys = "0.3.61"
+chrono = { version = "0.4.22", features = ["serde", "wasmbind"] }
+fern = "0.6.1"
+getrandom = { version = "0.2.7", features = ["js"] }
+js-sys = "0.3.60"
 log = "0.4.17"
-thiserror = "1.0.40"
-wasm-bindgen = { version = "0.2.84", features = ["serde-serialize"] }
-wasm-bindgen-futures = "0.4.34"
-web-sys = { version = "0.3.61", features = ["console"] }
-
-[dependencies.surrealdb]
-version = "1.0.0-beta.9"
-path = "../surrealdb/lib"
-default-features = false
-features = [
-	"kv-mem",
-	"kv-indxdb",
-	"protocol-http",
-	"protocol-ws",
-	"rustls",
-	"http",
-]
+surrealdb = { version = "1.0.0-beta.7", path = "../surrealdb/lib", default-features = false, features = ["kv-mem", "kv-indxdb", "http"] }
+thiserror = "1.0.35"
+wasm-bindgen = { version = "0.2.83", features = ["serde-serialize"] }
+wasm-bindgen-futures = "0.4.33"
+web-sys = { version = "0.3.60", features = ["console"] }

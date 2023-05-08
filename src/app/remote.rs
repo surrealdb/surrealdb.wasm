@@ -1,4 +1,4 @@
-use surrealdb::dbs::Session;
+use surrealdb::Session;
 
 pub struct Remote {
 	url: String,
