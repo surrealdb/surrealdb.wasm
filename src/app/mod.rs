@@ -3,8 +3,6 @@ mod opt;
 
 use opt::auth::Credentials;
 use opt::patch::Patch;
-use opt::resource::Clause;
-use opt::resource::Update;
 use serde_json::Value as Json;
 use serde_wasm_bindgen::from_value;
 use serde_wasm_bindgen::to_value;
@@ -15,7 +13,9 @@ use surrealdb::opt::auth::Root;
 use surrealdb::opt::auth::Scope;
 use surrealdb::opt::PatchOp;
 use surrealdb::opt::Resource;
+use std::collections::VecDeque;
 use surrealdb::sql::Value;
+use surrealdb::sql::Range;
 use wasm_bindgen::prelude::*;
 
 pub use crate::err::Error;
@@ -287,12 +287,17 @@ impl Surreal {
 	/// // Select all records from a table
 	/// const people = await db.select('person');
 	///
+	/// // Select a range records from a table
+	/// const people = await db.select('person:jane..john');
+	///
 	/// // Select a specific record from a table
 	/// const person = await db.select('person:h5wxrf2ewk8xjxosxtyc');
 	/// ```
 	pub async fn select(&self, resource: String) -> Result<JsValue, Error> {
-		let resource = Resource::from(resource);
-		let response = self.db.select(resource).await?;
+        let response = match resource.parse::<Range>() {
+            Ok(range) => self.db.select(Resource::from(range.tb)).range((range.beg, range.end)).await?,
+            Err(_) => self.db.select(Resource::from(resource)).await?,
+        };
 		Ok(to_value(&response.into_json())?)
 	}
 
@@ -303,19 +308,18 @@ impl Surreal {
 	/// const person = await db.create('person');
 	///
 	/// Create a record with fields set
-	/// const record = {
+	/// const person = await db.create('person', {
 	///     name: 'Tobie',
 	///     settings: {
 	///         active: true,
 	///         marketing: true
 	///     }
-	/// };
-	/// const person = db.create('person', { content: record });
+	/// });
 	/// ```
 	pub async fn create(&self, resource: String, data: JsValue) -> Result<JsValue, Error> {
 		let resource = Resource::from(resource);
-		let response = match from_value::<Option<opt::resource::Create>>(data)? {
-			Some(data) => self.db.create(resource).content(data.content).await?,
+		let response = match from_value::<Option<Json>>(data)? {
+			Some(data) => self.db.create(resource).content(data).await?,
 			None => self.db.create(resource).await?,
 		};
 		Ok(to_value(&response.into_json())?)
@@ -324,85 +328,150 @@ impl Surreal {
 	/// Update all records in a table, or a specific record
 	///
 	/// ```js
-	/// const record = {
+	/// // Replace all records in a table with the specified data.
+	/// const people = await db.update('person', {
 	///     name: 'Tobie',
 	///     settings: {
 	///         active: true,
 	///         marketing: true
 	///     }
-	/// };
+	/// });
 	///
+	/// // Replace a range of records with the specified data.
+	/// const person = await db.update('person:jane..john', {
+	///     name: 'Tobie',
+	///     settings: {
+	///         active: true,
+	///         marketing: true
+	///     }
+	/// });
+    ///
 	/// // Replace the current document / record data with the specified data.
-	/// const person = db.update('person:tobie', { content: record });
-	///
-	/// // Merge the current document / record data with the specified data.
-	/// const person = db.update('person:tobie', { merge: record });
-	///
-	/// // Apply JSON Patch changes to all records, or a specific record, in the database.
-	/// const person = db.update('person:tobie', {
-	///     patch: { op: 'replace', path: '/settings/active', value: false }
+	/// const person = await db.update('person:tobie', {
+	///     name: 'Tobie',
+	///     settings: {
+	///         active: true,
+	///         marketing: true
+	///     }
 	/// });
 	/// ```
 	pub async fn update(&self, resource: String, data: JsValue) -> Result<JsValue, Error> {
-		let resource = Resource::from(resource);
-		let Some(clause) = from_value::<Option<Update>>(data)?.and_then(|update| update.clause) else {
-            let response = self.db.update(resource).await?;
-            return Ok(to_value(&response.into_json())?);
+        let update = match resource.parse::<Range>() {
+            Ok(range) => self.db.update(Resource::from(range.tb)).range((range.beg, range.end)),
+            Err(_) => self.db.update(Resource::from(resource)),
         };
-		let response = match clause {
-			Clause::Content(data) => self.db.update(resource).content(data).await?,
-			Clause::Merge(data) => self.db.update(resource).merge(data).await?,
-			Clause::Patch(mut patches) => {
-				// Extract the first patch
-				let mut patch = match patches.pop_front() {
-					// Setup the correct update type using the first patch
-					Some(p) => self.db.update(resource).patch(match p {
-						Patch::Add {
-							path,
-							value,
-						} => PatchOp::add(&path, value),
-						Patch::Remove {
-							path,
-						} => PatchOp::remove(&path),
-						Patch::Replace {
-							path,
-							value,
-						} => PatchOp::replace(&path, value),
-						Patch::Change {
-							path,
-							diff,
-						} => PatchOp::change(&path, diff),
-					}),
-					None => {
-						let response = self.db.update(resource).await?;
-						return Ok(to_value(&response.into_json())?);
-					}
-				};
-				// Loop through the rest of the patches and append them to the
-				// update statement
-				for p in patches {
-					patch = patch.patch(match p {
-						Patch::Add {
-							path,
-							value,
-						} => PatchOp::add(&path, value),
-						Patch::Remove {
-							path,
-						} => PatchOp::remove(&path),
-						Patch::Replace {
-							path,
-							value,
-						} => PatchOp::replace(&path, value),
-						Patch::Change {
-							path,
-							diff,
-						} => PatchOp::change(&path, diff),
-					});
-				}
-				// Execute the update statement
-				patch.await?
-			}
-		};
+		let response = match from_value::<Option<Json>>(data)? {
+            Some(data) => update.content(data).await?,
+            None => update.await?,
+        };
+		Ok(to_value(&response.into_json())?)
+	}
+
+	/// Merge records in a table with specified data
+	///
+	/// ```js
+	/// // Merge all records in a table with specified data.
+	/// const person = await db.merge('person', {
+    ///     marketing: true
+	/// });
+	///
+	/// // Merge a range of records with the specified data.
+	/// const person = await db.merge('person:jane..john', {
+    ///     marketing: true
+	/// });
+    ///
+	/// // Merge the current document / record data with the specified data.
+	/// const person = await db.merge('person:tobie', {
+    ///     marketing: true
+	/// });
+	/// ```
+	pub async fn merge(&self, resource: String, data: JsValue) -> Result<JsValue, Error> {
+        let update = match resource.parse::<Range>() {
+            Ok(range) => self.db.update(Resource::from(range.tb)).range((range.beg, range.end)),
+            Err(_) => self.db.update(Resource::from(resource)),
+        };
+		let data: Json = from_value(data)?;
+        let response = update.merge(data).await?;
+		Ok(to_value(&response.into_json())?)
+	}
+
+	/// Patch all records in a table or a specific record
+	///
+	/// ```js
+	/// // Apply JSON Patch changes to all records in the database.
+	/// const person = await db.patch('person', [{
+    ///     op: 'replace',
+    ///     path: '/settings/active',
+    ///     value: false
+    /// }]);
+	///
+	/// // Apply JSON Patch to a range of records.
+	/// const person = await db.patch('person:jane..john', [{
+    ///     op: 'replace',
+    ///     path: '/settings/active',
+    ///     value: false
+    /// }]);
+	///
+	/// // Apply JSON Patch to a specific record.
+	/// const person = await db.patch('person:tobie', [{
+    ///     op: 'replace',
+    ///     path: '/settings/active',
+    ///     value: false
+    /// }]);
+	/// ```
+	pub async fn patch(&self, resource: String, data: JsValue) -> Result<JsValue, Error> {
+		// Prepare the update request
+        let update = match resource.parse::<Range>() {
+            Ok(range) => self.db.update(Resource::from(range.tb)).range((range.beg, range.end)),
+            Err(_) => self.db.update(Resource::from(resource)),
+        };
+		let mut patches: VecDeque<Patch> = from_value(data)?;
+        // Extract the first patch
+        let mut patch = match patches.pop_front() {
+            // Setup the correct update type using the first patch
+            Some(p) => update.patch(match p {
+                Patch::Add {
+                    path,
+                    value,
+                } => PatchOp::add(&path, value),
+                Patch::Remove {
+                    path,
+                } => PatchOp::remove(&path),
+                Patch::Replace {
+                    path,
+                    value,
+                } => PatchOp::replace(&path, value),
+                Patch::Change {
+                    path,
+                    diff,
+                } => PatchOp::change(&path, diff),
+            }),
+            None => {
+                return Ok(to_value(&update.await?.into_json())?);
+            }
+        };
+        // Loop through the rest of the patches and append them
+        for p in patches {
+            patch = patch.patch(match p {
+                Patch::Add {
+                    path,
+                    value,
+                } => PatchOp::add(&path, value),
+                Patch::Remove {
+                    path,
+                } => PatchOp::remove(&path),
+                Patch::Replace {
+                    path,
+                    value,
+                } => PatchOp::replace(&path, value),
+                Patch::Change {
+                    path,
+                    diff,
+                } => PatchOp::change(&path, diff),
+            });
+        }
+        // Execute the update statement
+        let response = patch.await?;
 		Ok(to_value(&response.into_json())?)
 	}
 
@@ -412,12 +481,17 @@ impl Surreal {
 	/// // Delete all records from a table
 	/// const records = await db.delete('person');
 	///
+	/// // Delete a range records from a table
+	/// const people = await db.delete('person:jane..john');
+	///
 	/// // Delete a specific record from a table
 	/// const record = await db.delete('person:h5wxrf2ewk8xjxosxtyc');
 	/// ```
 	pub async fn delete(&self, resource: String) -> Result<JsValue, Error> {
-		let resource = Resource::from(resource);
-		let response = self.db.delete(resource).await?;
+        let response = match resource.parse::<Range>() {
+            Ok(range) => self.db.delete(Resource::from(range.tb)).range((range.beg, range.end)).await?,
+            Err(_) => self.db.delete(Resource::from(resource)).await?,
+        };
 		Ok(to_value(&response.into_json())?)
 	}
 

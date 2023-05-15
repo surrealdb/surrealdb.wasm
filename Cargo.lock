@@ -1707,7 +1707,7 @@ dependencies = [
 [[package]]
 name = "surrealdb"
 version = "1.0.0-beta.9+20230402"
-source = "git+https://github.com/surrealdb/surrealdb?rev=01b2806#01b280623c4e8420b280f679a23fa49250789d91"
+source = "git+https://github.com/surrealdb/surrealdb?rev=c02d176#c02d176646259e6a200b12656a73c351246c1bfe"
 dependencies = [
  "addr",
  "any_ascii",
