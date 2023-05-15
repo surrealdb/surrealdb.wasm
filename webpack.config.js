@@ -33,7 +33,7 @@ export default [
 			],
 		},
 		experiments: {
-			syncWebAssembly: true,
+			asyncWebAssembly: true,
 		},
 		devtool: false,
 	},
@@ -53,7 +53,7 @@ export default [
 			},
 		},
 		experiments: {
-			syncWebAssembly: true,
+			asyncWebAssembly: true,
 		},
 		devtool: false,
 	},

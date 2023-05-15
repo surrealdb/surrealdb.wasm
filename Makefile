@@ -5,12 +5,12 @@ default:
 
 .PHONY: setup
 setup:
-	cargo upgrade --pinned
 	cargo update
+	cargo upgrade --pinned --to-lockfile
 
 .PHONY: check
 check:
-	cargo check --workspace
+	cargo check
 	cargo fmt --all -- --check
 	cargo clippy -- -W warnings
 

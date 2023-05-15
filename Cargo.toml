@@ -16,26 +16,24 @@ codegen-units = 1
 name = "surrealdb"
 crate-type = ["cdylib"]
 
+[features]
+default = ["protocol-ws", "rustls"]
+protocol-ws = ["surrealdb/protocol-ws"]
+protocol-http = ["surrealdb/protocol-http"]
+kv-indxdb = ["surrealdb/kv-indxdb"]
+kv-mem = ["surrealdb/kv-mem"]
+http = ["surrealdb/http"]
+rustls = ["surrealdb/rustls"]
+
 [dependencies]
 chrono = { version = "0.4.24", features = ["serde", "wasmbind"] }
+dmp = "0.1.3"
 fern = "0.6.2"
-getrandom = { version = "0.2.9", features = ["js"] }
-js-sys = "0.3.61"
 log = "0.4.17"
-thiserror = "1.0.40"
-wasm-bindgen = { version = "0.2.84", features = ["serde-serialize"] }
-wasm-bindgen-futures = "0.4.34"
-web-sys = { version = "0.3.61", features = ["console"] }
-
-[dependencies.surrealdb]
-version = "1.0.0-beta.9"
-path = "../surrealdb/lib"
-default-features = false
-features = [
-	"kv-mem",
-	"kv-indxdb",
-	"protocol-http",
-	"protocol-ws",
-	"rustls",
-	"http",
-]
+serde = { version = "1.0.163", features = ["derive"] }
+serde-wasm-bindgen = "0.5.0"
+serde_json = "1.0.96"
+surrealdb = { git = "https://github.com/surrealdb/surrealdb", rev = "c02d176", default-features = false }
+wasm-bindgen = { version = "0.2.85", features = ["serde-serialize"] }
+wasm-bindgen-futures = "0.4.35"
+web-sys = { version = "0.3.62", features = ["console"] }
