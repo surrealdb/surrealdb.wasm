@@ -27,16 +27,16 @@ rustls = ["surrealdb/rustls"]
 
 [dependencies]
 chrono = { version = "0.4.24", features = ["serde", "wasmbind"] }
-dmp = "0.1.3"
+dmp = "0.2.0"
 fern = "0.6.2"
 log = "0.4.17"
 serde = { version = "1.0.163", features = ["derive"] }
 serde-wasm-bindgen = "0.5.0"
 serde_json = "1.0.96"
-surrealdb = { git = "https://github.com/surrealdb/surrealdb", rev = "c02d176", default-features = false }
-wasm-bindgen = { version = "0.2.85", features = ["serde-serialize"] }
-wasm-bindgen-futures = "0.4.35"
-web-sys = { version = "0.3.62", features = ["console"] }
+surrealdb = { git = "https://github.com/surrealdb/surrealdb", default-features = false }
+wasm-bindgen = { version = "0.2.86", features = ["serde-serialize"] }
+wasm-bindgen-futures = "0.4.36"
+web-sys = { version = "0.3.63", features = ["console"] }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.36"
