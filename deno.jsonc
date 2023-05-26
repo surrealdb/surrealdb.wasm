@@ -1,12 +1,28 @@
 {
 	"lint": {
 		"files": {
-			"include": ["src/", "./mod.ts", "./compile.ts", "./deno.json"]
+			"include": [
+				"./mod.js",
+				"./mod.d.ts",
+				"./ws.js",
+				"./ws.d.ts",
+				"./http.js",
+				"./http.d.ts",
+				"./deno.jsonc"
+			]
 		}
 	},
 	"fmt": {
 		"files": {
-			"include": ["src/", "./mod.ts", "./compile.ts", "./deno.json"]
+			"include": [
+				"./mod.js",
+				"./mod.d.ts",
+				"./ws.js",
+				"./ws.d.ts",
+				"./http.js",
+				"./http.d.ts",
+				"./deno.jsonc"
+			]
 		},
 		"options": {
 			"useTabs": true,
@@ -17,9 +33,7 @@
 	},
 	"tasks": {
 		"serve": "deno task esbuild --bundle --servedir=.",
-		"build": "deno task build:deno",
-
-		"build:deno": "deno task compile && deno task bundle",
+		"build": "deno task compile && deno task bundle",
 
 		"compile": "deno task compile:full && deno task compile:ws && deno task compile:http",
 		"compile:full": "wasm-pack build --release --target deno --out-name index --out-dir compiled/full --no-default-features --features protocol-ws,protocol-http,kv-indxdb,kv-mem,rustls",
