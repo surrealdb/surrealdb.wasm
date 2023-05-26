@@ -16,7 +16,7 @@ check:
 
 .PHONY: test
 test:
-	cargo test
+	wasm-pack test --node
 
 .PHONY: clean
 clean:
