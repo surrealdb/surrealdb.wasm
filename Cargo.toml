@@ -4,6 +4,9 @@ publish = false
 edition = "2021"
 version = "0.0.0"
 authors = ["Tobie Morgan Hitchcock <tobie@surrealdb.com>"]
+description = "WebAssembly driver for SurrealDB"
+repository = "https://github.com/surrealdb/surrealdb.wasm"
+license = "Apache License 2.0"
 
 [profile.release]
 lto = true
