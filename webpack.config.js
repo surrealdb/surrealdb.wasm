@@ -1,7 +1,7 @@
 export default [
 	{
 		target: 'web',
-		mode: 'development',
+		mode: 'production',
 		entry: '/index.js',
 		output: {
 			clean: true,
