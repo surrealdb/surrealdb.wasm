@@ -1,0 +1,30 @@
+/* tslint:disable */
+/* eslint-disable */
+export const memory: WebAssembly.Memory;
+export function setup(): void;
+export function __wbg_surreal_free(a: number): void;
+export function surreal_init(): number;
+export function surreal_connect(a: number, b: number, c: number, d: number): number;
+export function surreal_use(a: number, b: number): number;
+export function surreal_set(a: number, b: number, c: number, d: number): number;
+export function surreal_unset(a: number, b: number, c: number): number;
+export function surreal_signup(a: number, b: number): number;
+export function surreal_signin(a: number, b: number): number;
+export function surreal_invalidate(a: number): number;
+export function surreal_authenticate(a: number, b: number, c: number): number;
+export function surreal_query(a: number, b: number, c: number, d: number): number;
+export function surreal_select(a: number, b: number, c: number): number;
+export function surreal_create(a: number, b: number, c: number, d: number): number;
+export function surreal_update(a: number, b: number, c: number, d: number): number;
+export function surreal_merge(a: number, b: number, c: number, d: number): number;
+export function surreal_patch(a: number, b: number, c: number, d: number): number;
+export function surreal_delete(a: number, b: number, c: number): number;
+export function surreal_version(a: number): number;
+export function surreal_health(a: number): number;
+export function __wbindgen_export_0(a: number): number;
+export function __wbindgen_export_1(a: number, b: number, c: number): number;
+export const __wbindgen_export_2: WebAssembly.Table;
+export function __wbindgen_export_3(a: number, b: number, c: number): void;
+export function __wbindgen_export_4(a: number, b: number): void;
+export function __wbindgen_export_5(a: number): void;
+export function __wbindgen_export_6(a: number, b: number, c: number, d: number): void;
