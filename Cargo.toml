@@ -37,3 +37,6 @@ surrealdb = { git = "https://github.com/surrealdb/surrealdb", rev = "c02d176", d
 wasm-bindgen = { version = "0.2.85", features = ["serde-serialize"] }
 wasm-bindgen-futures = "0.4.35"
 web-sys = { version = "0.3.62", features = ["console"] }
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.36"
