@@ -13,22 +13,11 @@
   "type": "module",
   "files": [
     "dist/",
-    "mod.js",
-    "mod.d.ts",
-    "ws.js",
-    "ws.d.ts",
-    "http.js",
-    "http.d.ts"
+    "lib/"
   ],
   "exports": {
-    ".": {
-      "browser": "./mod.js"
-    },
-    "./ws": {
-      "browser": "./ws.js"
-    },
-    "./http": {
-      "browser": "./http.js"
-    }
+    ".": "./lib/full.js",
+    "./ws": "./lib/ws.js",
+    "./http": "./lib/http.js"
   }
 }

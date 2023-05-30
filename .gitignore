@@ -27,7 +27,7 @@ Temporary Items
 
 /compiled
 /node_modules
-/pkg
+/dist
 /target
 
 # -----------------------------------

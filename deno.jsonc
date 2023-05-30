@@ -2,12 +2,7 @@
 	"lint": {
 		"files": {
 			"include": [
-				"./mod.js",
-				"./mod.d.ts",
-				"./ws.js",
-				"./ws.d.ts",
-				"./http.js",
-				"./http.d.ts",
+				"./lib",
 				"./deno.jsonc"
 			]
 		}
@@ -15,12 +10,7 @@
 	"fmt": {
 		"files": {
 			"include": [
-				"./mod.js",
-				"./mod.d.ts",
-				"./ws.js",
-				"./ws.d.ts",
-				"./http.js",
-				"./http.d.ts",
+				"./lib",
 				"./deno.jsonc"
 			]
 		},
