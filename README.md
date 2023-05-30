@@ -26,13 +26,48 @@ View the [features](https://surrealdb.com/features), the latest [releases](https
 - [x] Connections have auto-reconnect capabilities
 - [x] Range queries
 - [x] Consistent API across all supported protocols and storage engines
+- [x] Closely matches the API of the Javascript library
 - [x] Asynchronous, lock-free connections
+
+<h2><img height="20" src="https://github.com/surrealdb/surrealdb/blob/main/img/gettingstarted.svg?raw=true">&nbsp;&nbsp;Getting started</h2>
+
+It is important to know what the `surrealdb.wasm` library is, and what it is not:
+- It's a library targeted to browsers, not NodeJS.
+- It is targeted towards ES modules (`import` statements), not CommonJS (`require` function).
+
+The library comes in three formats:
+- **Full**: Being the default, all the features are enabled in this build at the cost of a slightly bigger binary.
+	- In-memory
+	- IndxDB
+	- Connect over WebSockets
+	- Connect over HTTP
+- **WS**: With this build you can only connect over WebSockets.
+- **HTTP**: With this build you can only connect over the REST HTTP api.
+
+## Importing the module
+A few code snippets to showcase various ways of importing the library.
+
+```js
+import { Surreal } from 'surrealdb.wasm';
+import { Surreal } from 'surrealdb.wasm/ws';
+import { Surreal } from 'surrealdb.wasm/http';
+```
+
+### Via UNPKG
+```js
+import { Surreal } from 'https://unpkg.com/surrealdb.wasm/lib/full.js';
+import { Surreal } from 'https://unpkg.com/surrealdb.wasm/lib/ws.js';
+import { Surreal } from 'https://unpkg.com/surrealdb.wasm/lib/http.js';
+```
+
 
 <h2><img height="20" src="https://github.com/surrealdb/surrealdb/blob/main/img/features.svg?raw=true">&nbsp;&nbsp;Quick look</h2>
 
 This library enables simple and advanced querying of an embedded or remote database. By default, all remote connections to SurrealDB are made over WebSockets, and automatically reconnect when the connection is terminated.
 
 ```js
+import { Surreal } from 'surrealdb.wasm';
+
 const db = new Surreal();
 
 try {
