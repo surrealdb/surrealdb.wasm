@@ -16,9 +16,18 @@
     "lib/"
   ],
   "exports": {
-    ".": "./lib/full.js",
-    "./ws": "./lib/ws.js",
-    "./http": "./lib/http.js"
+    ".": {
+      "default": "./lib/full.js",
+      "types": "./lib/full.d.ts"
+    },
+    "./ws": {
+      "default": "./lib/ws.js",
+      "types": "./lib/ws.d.ts"
+    },
+    "./http": {
+      "default": "./lib/http.js",
+      "types": "./lib/http.d.ts"
+    }
   },
   "scripts": {
     "serve": "esbuild --bundle --servedir=.",
