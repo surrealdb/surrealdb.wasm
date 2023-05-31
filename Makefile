@@ -25,9 +25,9 @@ clean:
 
 .PHONY: serve
 serve:
-	deno task build
-	deno task serve
+	npm run build
+	npm run serve
 
 .PHONY: build
 build:
-	deno task build
+	npm run build
