@@ -14,7 +14,7 @@ codegen-units = 1
 
 [lib]
 name = "surrealdb"
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
 
 [features]
 default = ["protocol-ws", "rustls"]
