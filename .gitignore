@@ -25,9 +25,9 @@ Temporary Items
 # Folders
 # -----------------------------------
 
-/dist
+/compiled
 /node_modules
-/pkg
+/dist
 /target
 
 # -----------------------------------

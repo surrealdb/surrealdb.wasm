@@ -21,14 +21,13 @@ test:
 .PHONY: clean
 clean:
 	cargo clean
+	rm -rf compiled/ dist/ target/
 
 .PHONY: serve
 serve:
-	wasm-pack build
-	npm run start
+	npm run build
+	npm run serve
 
 .PHONY: build
 build:
-	wasm-pack build
 	npm run build
-	wasm-pack pack

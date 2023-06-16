@@ -2,9 +2,15 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
-		<title>Webpack development server</title>
+		<title>Development server</title>
 	</head>
 	<body>
-		<script src="index.js"></script>
+		<p>Open a console to access the Surreal class!</p>
+		<script type="module">
+			import Surreal from './lib/full.js';
+			if (typeof window !== 'undefined') {
+				window.Surreal = Surreal;
+			}
+		</script>
 	</body>
 </html>
