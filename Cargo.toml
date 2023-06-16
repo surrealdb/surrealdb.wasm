@@ -27,9 +27,11 @@ kv-indxdb = ["surrealdb/kv-indxdb"]
 kv-mem = ["surrealdb/kv-mem"]
 http = ["surrealdb/http"]
 rustls = ["surrealdb/rustls"]
+stack-traces = ["console_error_panic_hook"]
 
 [dependencies]
 chrono = { version = "0.4.24", features = ["serde", "wasmbind"] }
+console_error_panic_hook = { version = "0.1.7", optional = true }
 dmp = "0.2.0"
 fern = "0.6.2"
 log = "0.4.17"
