@@ -31,17 +31,15 @@
   },
   "scripts": {
     "serve": "esbuild --bundle --servedir=.",
-    "build": "npm run compile && npm run bundle",
+    "build": "npm run compile && npm run build-literal",
     "compile": "npm run compile:full && npm run compile:ws && npm run compile:http",
-    "compile:full": "wasm-pack build --release --target deno --out-name index --out-dir compiled/full --no-default-features --features protocol-ws,protocol-http,kv-indxdb,kv-mem,rustls",
-    "compile:ws": "wasm-pack build --release --target deno --out-name index --out-dir compiled/ws --no-default-features --features protocol-ws,rustls",
-    "compile:http": "wasm-pack build --release --target deno --out-name index --out-dir compiled/http --no-default-features --features protocol-http,rustls",
-    "bundle": "npm run bundle:full && npm run bundle:ws && npm run bundle:http",
-    "bundle:full": "esbuild --bundle compiled/full/index.js --sourcemap --format=esm --outfile=dist/full/index.js && cp ./compiled/full/index_bg.wasm ./compiled/full/index_bg.wasm ./compiled/full/index_bg.wasm.d.ts ./compiled/full/index.d.ts ./dist/full/",
-    "bundle:ws": "esbuild --bundle compiled/ws/index.js --sourcemap --format=esm --outfile=dist/ws/index.js && cp ./compiled/ws/index_bg.wasm ./compiled/ws/index_bg.wasm ./compiled/ws/index_bg.wasm.d.ts ./compiled/ws/index.d.ts ./dist/ws/",
-    "bundle:http": "esbuild --bundle compiled/http/index.js --sourcemap --format=esm --outfile=dist/http/index.js && cp ./compiled/http/index_bg.wasm ./compiled/http/index_bg.wasm ./compiled/http/index_bg.wasm.d.ts ./compiled/http/index.d.ts ./dist/http/"
+    "compile:full": "wasm-pack build --release --target deno --out-name index --out-dir compiled/full --no-default-features --features protocol-ws,protocol-http,kv-indxdb,kv-mem,rustls,stack-traces",
+    "compile:ws": "wasm-pack build --release --target deno --out-name index --out-dir compiled/ws --no-default-features --features protocol-ws,rustls,stack-traces",
+    "compile:http": "wasm-pack build --release --target deno --out-name index --out-dir compiled/http --no-default-features --features protocol-http,rustls,stack-traces",
+    "build-literal": "node build/index.js"
   },
   "devDependencies": {
-    "esbuild": "^0.17.19"
+    "esbuild": "^0.17.19",
+    "esbuild-plugin-copy-file": "^0.0.2"
   }
 }
