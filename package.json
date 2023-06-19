@@ -33,9 +33,9 @@
     "serve": "esbuild --bundle --servedir=.",
     "build": "npm run compile && npm run build-literal",
     "compile": "npm run compile:full && npm run compile:ws && npm run compile:http",
-    "compile:full": "wasm-pack build --release --target deno --out-name index --out-dir compiled/full --no-default-features --features protocol-ws,protocol-http,kv-indxdb,kv-mem,rustls,stack-traces",
-    "compile:ws": "wasm-pack build --release --target deno --out-name index --out-dir compiled/ws --no-default-features --features protocol-ws,rustls,stack-traces",
-    "compile:http": "wasm-pack build --release --target deno --out-name index --out-dir compiled/http --no-default-features --features protocol-http,rustls,stack-traces",
+    "compile:full": "wasm-pack build --release --target deno --out-name index --out-dir compiled/full --no-default-features --features protocol-ws,protocol-http,kv-indxdb,kv-mem,rustls",
+    "compile:ws": "wasm-pack build --release --target deno --out-name index --out-dir compiled/ws --no-default-features --features protocol-ws,rustls",
+    "compile:http": "wasm-pack build --release --target deno --out-name index --out-dir compiled/http --no-default-features --features protocol-http,rustls",
     "build-literal": "node build/index.js"
   },
   "devDependencies": {
