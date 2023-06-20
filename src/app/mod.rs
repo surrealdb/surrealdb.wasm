@@ -20,7 +20,7 @@ use wasm_bindgen::prelude::*;
 
 pub use crate::err::Error;
 
-#[wasm_bindgen]
+#[wasm_bindgen(start)]
 pub fn setup() {
 	self::log::init();
 }
