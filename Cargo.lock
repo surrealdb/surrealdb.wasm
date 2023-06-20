@@ -1646,6 +1646,7 @@ name = "surrealdb"
 version = "0.0.0"
 dependencies = [
  "chrono",
+ "console_error_panic_hook",
  "dmp",
  "fern",
  "log",

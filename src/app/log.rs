@@ -3,6 +3,10 @@ use log::Record;
 use web_sys::console;
 
 pub fn init() {
+	// Display stack traces if enabled
+	#[cfg(feature = "stack-traces")]
+	console_error_panic_hook::set_once();
+	// Ensure logs are output accordingly
 	let mut logger = fern::Dispatch::new();
 	logger = logger.level_for("surrealdb", log::LevelFilter::Trace);
 	logger = logger.level(log::LevelFilter::Trace);
