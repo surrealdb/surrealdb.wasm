@@ -30,18 +30,18 @@ rustls = ["surrealdb/rustls"]
 stack-traces = ["dep:console_error_panic_hook"]
 
 [dependencies]
-chrono = { version = "0.4.24", features = ["serde", "wasmbind"] }
+chrono = { version = "0.4.26", features = ["serde", "wasmbind"] }
 console_error_panic_hook = { version = "0.1.7", optional = true }
 dmp = "0.2.0"
 fern = "0.6.2"
-log = "0.4.17"
-serde = { version = "1.0.163", features = ["derive"] }
+log = "0.4.19"
+serde = { version = "1.0.164", features = ["derive"] }
 serde-wasm-bindgen = "0.5.0"
-serde_json = "1.0.96"
-surrealdb = { git = "https://github.com/surrealdb/surrealdb", default-features = false }
-wasm-bindgen = { version = "0.2.86", features = ["serde-serialize"] }
-wasm-bindgen-futures = "0.4.36"
-web-sys = { version = "0.3.63", features = ["console"] }
+serde_json = "1.0.97"
+surrealdb = { git = "https://github.com/surrealdb/surrealdb", default-features = false, rev = "9cd25566ac2f202315aa29a090bfb50e5d76c4eb" }
+wasm-bindgen = { version = "0.2.87", features = ["serde-serialize"] }
+wasm-bindgen-futures = "0.4.37"
+web-sys = { version = "0.3.64", features = ["console"] }
 
 [dev-dependencies]
-wasm-bindgen-test = "0.3.36"
+wasm-bindgen-test = "0.3.37"
