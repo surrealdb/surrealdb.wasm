@@ -38,7 +38,7 @@ log = "0.4.19"
 serde = { version = "1.0.164", features = ["derive"] }
 serde-wasm-bindgen = "0.5.0"
 serde_json = "1.0.97"
-surrealdb = { git = "https://github.com/surrealdb/surrealdb", default-features = false }
+surrealdb = { git = "https://github.com/surrealdb/surrealdb", default-features = false, rev = "9cd25566ac2f202315aa29a090bfb50e5d76c4eb" }
 wasm-bindgen = { version = "0.2.87", features = ["serde-serialize"] }
 wasm-bindgen-futures = "0.4.37"
 web-sys = { version = "0.3.64", features = ["console"] }
