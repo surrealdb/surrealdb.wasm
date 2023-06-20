@@ -31,8 +31,8 @@ async function bundle(target) {
 				after: Object.fromEntries(
 					["index_bg.wasm", "index_bg.wasm.d.ts", "index.d.ts"].map(
 						(f) => [
-							`compiled/${target}/${f}`,
 							`dist/${target}/${f}`,
+							`compiled/${target}/${f}`,
 						]
 					)
 				),
