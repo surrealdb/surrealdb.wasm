@@ -17,16 +17,16 @@
   ],
   "exports": {
     ".": {
-      "default": "./lib/full.js",
-      "types": "./lib/full.d.ts"
+      "types": "./lib/full.d.ts",
+      "default": "./lib/full.js"
     },
     "./ws": {
-      "default": "./lib/ws.js",
-      "types": "./lib/ws.d.ts"
+      "types": "./lib/ws.d.ts",
+      "default": "./lib/ws.js"
     },
     "./http": {
-      "default": "./lib/http.js",
-      "types": "./lib/http.d.ts"
+      "types": "./lib/http.d.ts",
+      "default": "./lib/http.js"
     }
   },
   "scripts": {
