@@ -3,9 +3,10 @@ mod opt;
 
 use opt::auth::Credentials;
 use opt::patch::Patch;
+use serde::Serialize;
 use serde_json::Value as Json;
 use serde_wasm_bindgen::from_value;
-use serde_wasm_bindgen::to_value;
+use serde_wasm_bindgen::Serializer;
 use std::collections::VecDeque;
 use surrealdb::engine::any::Any;
 use surrealdb::opt::auth::Database;
@@ -19,6 +20,11 @@ use surrealdb::sql::Value;
 use wasm_bindgen::prelude::*;
 
 pub use crate::err::Error;
+
+// Converts a Rust value into a [`JsValue`].
+fn to_value<T: Serialize + ?Sized>(value: &T) -> Result<JsValue, serde_wasm_bindgen::Error> {
+	value.serialize(&Serializer::json_compatible())
+}
 
 #[wasm_bindgen(start)]
 pub fn setup() {
