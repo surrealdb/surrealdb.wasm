@@ -26,3 +26,9 @@ impl From<&str> for Error {
 		Self(JsValue::from(v))
 	}
 }
+
+impl From<String> for Error {
+	fn from(v: String) -> Self {
+		Self(JsValue::from(v))
+	}
+}
