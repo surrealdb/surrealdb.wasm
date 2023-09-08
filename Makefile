@@ -6,7 +6,7 @@ default:
 .PHONY: setup
 setup:
 	cargo update
-	cargo upgrade --pinned --to-lockfile
+	cargo upgrade --pinned
 
 .PHONY: check
 check:

@@ -13,6 +13,7 @@ use surrealdb::opt::auth::Database;
 use surrealdb::opt::auth::Namespace;
 use surrealdb::opt::auth::Root;
 use surrealdb::opt::auth::Scope;
+use surrealdb::opt::Config;
 use surrealdb::opt::PatchOp;
 use surrealdb::opt::Resource;
 use surrealdb::sql::Range;
@@ -67,21 +68,81 @@ impl Surreal {
 	/// // Connect to an IndxDB engine
 	/// await db.connect('indxdb://MyDatabase');
 	///
-	/// // Connect to a strict memory engine
-	/// await db.connect('memory', { strict: true });
-	///
 	/// // Limit number of concurrent connections
-	/// await db.connect('ws://localhost:8000', { capacity: 100000 });
+	/// await db.connect('indxdb://MyDatabase', { capacity: 100000 });
+	///
+	/// // Enable strict mode on a local engine
+	/// await db.connect('indxdb://MyDatabase', { strict: true });
+	///
+	/// // Enable notifications
+	/// await db.connect('indxdb://MyDatabase', { notifications: true });
+	///
+	/// // Set query timeout time in seconds
+	/// await db.connect('indxdb://MyDatabase', { query_timeout: 60 });
+	///
+	/// // Set transaction timeout time in seconds
+	/// await db.connect('indxdb://MyDatabase', { transaction_timeout: 60 });
+	///
+	/// // Set changefeeds tick interval in seconds
+	/// await db.connect('indxdb://MyDatabase', { tick_interval: 60 });
+	///
+	/// // Configure a system user
+	/// await db.connect('indxdb://MyDatabase', { user: { username: "root", password: "root" } });
+	///
+	/// // Enable all capabilities
+	/// await db.connect('indxdb://MyDatabase', { capabilities: true });
+	///
+	/// // Disable all capabilities
+	/// await db.connect('indxdb://MyDatabase', { capabilities: false });
+	///
+	/// // Allow guest access
+	/// await db.connect('indxdb://MyDatabase', { capabilities: { guest_access: true } });
+	///
+	/// // Allow all SurrealQL functions
+	/// await db.connect('indxdb://MyDatabase', { capabilities: { functions: true } });
+	///
+	/// // Disallow all SurrealQL functions
+	/// await db.connect('indxdb://MyDatabase', { capabilities: { functions: false } });
+	///
+	/// // Allow only certain SurrealQL functions
+	/// await db.connect('indxdb://MyDatabase', { capabilities: { functions: ["fn", "string", "array::join"] } });
+	///
+	/// // Allow and disallow certain SurrealQL functions
+	/// await db.connect('indxdb://MyDatabase', {
+	///     capabilities: {
+	///         functions: {
+	///             allow: ["fn", "string", "array::join"], // You can also use `true` or `false` here to allow all or allow none
+	///             deny: ["array"],                        // You can also use `true` or `false` here to deny all or deny none
+	///         },
+	///     },
+	/// });
+	///
+	/// // Allow all network targets
+	/// await db.connect('indxdb://MyDatabase', { capabilities: { network_targets: true } });
+	///
+	/// // Disallow all network targets
+	/// await db.connect('indxdb://MyDatabase', { capabilities: { network_targets: false } });
+	///
+	/// // Allow only certain network targets
+	/// await db.connect('indxdb://MyDatabase', { capabilities: { network_targets: ["http"] } });
+	///
+	/// // Allow and disallow certain network targets
+	/// await db.connect('indxdb://MyDatabase', {
+	///     capabilities: {
+	///         network_targets: {
+	///             allow: ["http"],                      // You can also use `true` or `false` here to allow all or allow none
+	///             deny: ["ssh"],                        // You can also use `true` or `false` here to deny all or deny none
+	///         },
+	///     },
+	/// });
 	/// ```
 	pub async fn connect(&self, endpoint: String, opts: JsValue) -> Result<(), Error> {
 		let connect = match from_value::<Option<opt::endpoint::Options>>(opts)? {
 			Some(opts) => {
-				let connect = match opts.strict {
-					#[cfg(any(feature = "kv-indxdb", feature = "kv-mem"))]
-					Some(true) => self.db.connect((endpoint, surrealdb::opt::Strict)),
-					_ => self.db.connect(endpoint),
-				};
-				match opts.capacity {
+				let capacity = opts.capacity;
+				let config = Config::try_from(opts)?;
+				let connect = self.db.connect((endpoint, config));
+				match capacity {
 					Some(capacity) => connect.with_capacity(capacity),
 					None => connect,
 				}
@@ -191,7 +252,7 @@ impl Surreal {
 	/// });
 	/// ```
 	pub async fn signin(&self, credentials: JsValue) -> Result<JsValue, Error> {
-		let signin = match &from_value::<Credentials>(credentials)? {
+		let token = match &from_value::<Credentials>(credentials)? {
 			Credentials::Scope {
 				namespace,
 				database,
@@ -226,17 +287,13 @@ impl Surreal {
 			Credentials::Root {
 				username,
 				password,
-			} => {
-				self.db
-					.signin(Root {
-						username,
-						password,
-					})
-					.await?;
-				return Ok(JsValue::NULL);
-			}
-		};
-		Ok(to_value(&signin.await?)?)
+			} => self.db.signin(Root {
+				username,
+				password,
+			}),
+		}
+		.await?;
+		Ok(to_value(&token)?)
 	}
 
 	/// Invalidates the authentication for the current connection
