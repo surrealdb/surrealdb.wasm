@@ -18,6 +18,7 @@ use surrealdb::opt::PatchOp;
 use surrealdb::opt::Resource;
 use surrealdb::sql::Range;
 use surrealdb::sql::Value;
+use surrealdb::sql::json;
 use wasm_bindgen::prelude::*;
 
 pub use crate::err::Error;
@@ -326,10 +327,10 @@ impl Surreal {
 	/// const people = await db.query('SELECT * FROM type::table($table)', { table: 'person' });
 	/// ```
 	pub async fn query(&self, sql: String, bindings: JsValue) -> Result<JsValue, Error> {
-		let bindings: Json = from_value(bindings)?;
-		let mut response = match bindings.is_null() {
-			true => self.db.query(sql).await?,
-			false => self.db.query(sql).bind(bindings).await?,
+		let bindings = json(&from_value::<Json>(bindings)?.to_string()).unwrap_or(Value::None);
+		let mut response = match bindings.is_object() {
+			true => self.db.query(sql).bind(bindings).await?,
+			false => self.db.query(sql).await?,
 		};
 		let num_statements = response.num_statements();
 		let response = if num_statements > 1 {
@@ -383,9 +384,10 @@ impl Surreal {
 	/// ```
 	pub async fn create(&self, resource: String, data: JsValue) -> Result<JsValue, Error> {
 		let resource = Resource::from(resource);
-		let response = match from_value::<Option<Json>>(data)? {
-			Some(data) => self.db.create(resource).content(data).await?,
-			None => self.db.create(resource).await?,
+		let data = json(&from_value::<Json>(data)?.to_string()).unwrap_or(Value::None);
+		let response = match data.is_object() {
+			true => self.db.create(resource).content(data).await?,
+			false => self.db.create(resource).await?,
 		};
 		Ok(to_value(&response.into_json())?)
 	}
@@ -425,9 +427,10 @@ impl Surreal {
 			Ok(range) => self.db.update(Resource::from(range.tb)).range((range.beg, range.end)),
 			Err(_) => self.db.update(Resource::from(resource)),
 		};
-		let response = match from_value::<Option<Json>>(data)? {
-			Some(data) => update.content(data).await?,
-			None => update.await?,
+		let data = json(&from_value::<Json>(data)?.to_string()).unwrap_or(Value::None);
+		let response = match data.is_object() {
+			true => update.content(data).await?,
+			false => update.await?,
 		};
 		Ok(to_value(&response.into_json())?)
 	}
@@ -455,7 +458,7 @@ impl Surreal {
 			Ok(range) => self.db.update(Resource::from(range.tb)).range((range.beg, range.end)),
 			Err(_) => self.db.update(Resource::from(resource)),
 		};
-		let data: Json = from_value(data)?;
+		let data = json(&from_value::<Json>(data)?.to_string()).unwrap_or(Value::None);
 		let response = update.merge(data).await?;
 		Ok(to_value(&response.into_json())?)
 	}
