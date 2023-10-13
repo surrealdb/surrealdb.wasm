@@ -15,6 +15,12 @@ impl From<surrealdb::Error> for Error {
 	}
 }
 
+impl From<surrealdb::err::Error> for Error {
+	fn from(v: surrealdb::err::Error) -> Self {
+		Self(JsValue::from(v.to_string()))
+	}
+}
+
 impl From<serde_wasm_bindgen::Error> for Error {
 	fn from(v: serde_wasm_bindgen::Error) -> Self {
 		Self(JsValue::from(v.to_string()))
