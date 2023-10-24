@@ -469,7 +469,7 @@ impl Surreal {
 	/// // Run a query with bindings
 	/// const people = await db.query('SELECT * FROM type::table($table)', { table: 'person' });
 	/// ```
-	pub async fn query(&self, sql: String, bindings: TRecordUnknown) -> Result<TArrayUnknown, Error> {
+	pub async fn query(&self, sql: String, bindings: Option<TRecordUnknown>) -> Result<TArrayUnknown, Error> {
 		let bindings = JsValue::from(bindings);
 		let mut response = match bindings.is_undefined() {
 			true => self.db.query(sql).await?,
@@ -528,7 +528,7 @@ impl Surreal {
 	///     }
 	/// });
 	/// ```
-	pub async fn create(&self, resource: String, data: TRecordUnknown) -> Result<TArrayRecordUnknown, Error> {
+	pub async fn create(&self, resource: String, data: Option<TRecordUnknown>) -> Result<TArrayRecordUnknown, Error> {
 		let data = JsValue::from(data);
 		let resource = Resource::from(resource);
 		let response = match data.is_undefined() {
@@ -571,7 +571,7 @@ impl Surreal {
 	///     }
 	/// });
 	/// ```
-	pub async fn update(&self, resource: String, data: TRecordUnknown) -> Result<TArrayRecordUnknown, Error> {
+	pub async fn update(&self, resource: String, data: Option<TRecordUnknown>) -> Result<TArrayRecordUnknown, Error> {
 		let data = JsValue::from(data);
 		let update = match resource.parse::<Range>() {
 			Ok(range) => self.db.update(Resource::from(range.tb)).range((range.beg, range.end)),
