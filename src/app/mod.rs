@@ -27,21 +27,6 @@ fn to_value<T: Serialize + ?Sized>(value: &T) -> Result<JsValue, serde_wasm_bind
 	value.serialize(&Serializer::json_compatible())
 }
 
-fn array_response(values: Value) -> Result<Vec<JsValue>, Error> {
-	let values = match values {
-		Value::Array(v) => v,
-		v => Array::from(v)
-	};
-
-	let mut output = Vec::<JsValue>::new();
-	for v in values {
-		let v = to_value(&v.into_json())?;
-		output.push(v);
-	}
-
-	Ok(output)
-}
-
 #[wasm_bindgen(start)]
 pub fn setup() {
 	self::log::init();
@@ -101,6 +86,53 @@ type UseOptions = {
 	namespace?: string;
 	database?: string;
 };
+
+type BasePatch<T = string> = {
+	path: T;
+};
+
+export type AddPatch<T = string, U = unknown> = BasePatch<T> & {
+	op: "add";
+	value: U;
+};
+
+export type RemovePatch<T = string> = BasePatch<T> & {
+	op: "remove";
+};
+
+export type ReplacePatch<T = string, U = unknown> = BasePatch<T> & {
+	op: "replace";
+	value: U;
+};
+
+export type ChangePatch<T = string, U = string> = BasePatch<T> & {
+	op: "change";
+	value: U;
+};
+
+export type CopyPatch<T = string, U = string> = BasePatch<T> & {
+	op: "copy";
+	from: U;
+};
+
+export type MovePatch<T = string, U = string> = BasePatch<T> & {
+	op: "move";
+	from: U;
+};
+
+export type TestPatch<T = string, U = unknown> = BasePatch<T> & {
+	op: "test";
+	value: U;
+};
+
+export type Patch =
+	| AddPatch
+	| RemovePatch
+	| ReplacePatch
+	| ChangePatch
+	| CopyPatch
+	| MovePatch
+	| TestPatch;
 "#;
 
 #[wasm_bindgen]
@@ -115,6 +147,43 @@ extern "C" {
     pub type TUseOptions;
     #[wasm_bindgen(typescript_type = "unknown")]
     pub type TUnknown;
+	#[wasm_bindgen(typescript_type = "unknown[]")]
+	pub type TArrayUnknown;
+	#[wasm_bindgen(typescript_type = "Record<string, unknown>[]")]
+	pub type TArrayRecordUnknown;
+	#[wasm_bindgen(typescript_type = "Patch[]")]
+	pub type TArrayPatch;
+}
+
+impl TArrayUnknown {
+	fn from_value(value: Value) -> Result<Self, Error> {
+		let value = match value {
+			Value::Array(_) => value,
+			_ => Value::Array(Array::from(value)),
+		};
+
+		let value = to_value(&value.into_json())?;
+		Ok(value.into())
+	}
+}
+
+impl TArrayRecordUnknown {
+	fn from_value(value: Value) -> Result<Self, Error> {
+		let value = match value {
+			Value::Array(v) => v,
+			_ => Array::from(value),
+		};
+
+		for v in value.clone() {
+			if !matches!(v, Value::Object(_)) {
+				return Err(Error::from("Encountered a non-object value in array"))
+			}
+		}
+
+		let value = Value::Array(value);
+		let value = to_value(&value.into_json())?;
+		Ok(value.into())
+	}
 }
 
 #[wasm_bindgen]
@@ -415,7 +484,7 @@ impl Surreal {
 	/// // Run a query with bindings
 	/// const people = await db.query('SELECT * FROM type::table($table)', { table: 'person' });
 	/// ```
-	pub async fn query(&self, sql: String, bindings: TUnknown) -> Result<Vec<JsValue>, Error> {
+	pub async fn query(&self, sql: String, bindings: TUnknown) -> Result<TArrayUnknown, Error> {
 		let bindings = JsValue::from(bindings);
 		let mut response = match bindings.is_undefined() {
 			true => self.db.query(sql).await?,
@@ -426,15 +495,14 @@ impl Surreal {
 		};
 		let num_statements = response.num_statements();
 		let response = {
-			let mut output = Vec::<JsValue>::with_capacity(num_statements);
+			let mut output = Vec::<Value>::with_capacity(num_statements);
 			for index in 0..num_statements {
 				let v: Value = response.take(index)?;
-				let v = to_value(&v.into_json())?;
 				output.push(v);
 			}
-			output
+			Value::from(Array::from(output))
 		};
-		Ok(response)
+		Ok(TArrayUnknown::from_value(response)?)
 	}
 
 	/// Select all records in a table, or a specific record
@@ -449,15 +517,15 @@ impl Surreal {
 	/// // Select a specific record from a table
 	/// const person = await db.select('person:h5wxrf2ewk8xjxosxtyc');
 	/// ```
-	pub async fn select(&self, resource: String) -> Result<Vec<JsValue>, Error> {
+	#[wasm_bindgen]
+	pub async fn select(&self, resource: String) -> Result<TArrayRecordUnknown, Error> {
 		let response = match resource.parse::<Range>() {
 			Ok(range) => {
 				self.db.select(Resource::from(range.tb)).range((range.beg, range.end)).await?
 			}
 			Err(_) => self.db.select(Resource::from(resource)).await?,
 		};
-		let response = array_response(response)?;
-		Ok(response)
+		Ok(TArrayRecordUnknown::from_value(response)?)
 	}
 
 	/// Create a record in the database
@@ -475,7 +543,7 @@ impl Surreal {
 	///     }
 	/// });
 	/// ```
-	pub async fn create(&self, resource: String, data: JsValue) -> Result<JsValue, Error> {
+	pub async fn create(&self, resource: String, data: JsValue) -> Result<TArrayRecordUnknown, Error> {
 		let resource = Resource::from(resource);
 		let response = match data.is_undefined() {
 			true => self.db.create(resource).await?,
@@ -484,7 +552,7 @@ impl Surreal {
 				self.db.create(resource).content(data).await?
 			},
 		};
-		Ok(to_value(&response.into_json())?)
+		Ok(TArrayRecordUnknown::from_value(response)?)
 	}
 
 	/// Update all records in a table, or a specific record
@@ -517,7 +585,7 @@ impl Surreal {
 	///     }
 	/// });
 	/// ```
-	pub async fn update(&self, resource: String, data: JsValue) -> Result<JsValue, Error> {
+	pub async fn update(&self, resource: String, data: JsValue) -> Result<TArrayRecordUnknown, Error> {
 		let update = match resource.parse::<Range>() {
 			Ok(range) => self.db.update(Resource::from(range.tb)).range((range.beg, range.end)),
 			Err(_) => self.db.update(Resource::from(resource)),
@@ -529,7 +597,7 @@ impl Surreal {
 				update.content(data).await?
 			},
 		};
-		Ok(to_value(&response.into_json())?)
+		Ok(TArrayRecordUnknown::from_value(response)?)
 	}
 
 	/// Merge records in a table with specified data
@@ -550,14 +618,14 @@ impl Surreal {
 	///     marketing: true
 	/// });
 	/// ```
-	pub async fn merge(&self, resource: String, data: JsValue) -> Result<JsValue, Error> {
+	pub async fn merge(&self, resource: String, data: JsValue) -> Result<TArrayRecordUnknown, Error> {
 		let update = match resource.parse::<Range>() {
 			Ok(range) => self.db.update(Resource::from(range.tb)).range((range.beg, range.end)),
 			Err(_) => self.db.update(Resource::from(resource)),
 		};
 		let data = json(&from_value::<Json>(data)?.to_string())?;
 		let response = update.merge(data).await?;
-		Ok(to_value(&response.into_json())?)
+		Ok(TArrayRecordUnknown::from_value(response)?)
 	}
 
 	/// Patch all records in a table or a specific record
@@ -584,7 +652,7 @@ impl Surreal {
 	///     value: false
 	/// }]);
 	/// ```
-	pub async fn patch(&self, resource: String, data: JsValue) -> Result<JsValue, Error> {
+	pub async fn patch(&self, resource: String, data: JsValue) -> Result<TArrayUnknown, Error> {
 		// Prepare the update request
 		let update = match resource.parse::<Range>() {
 			Ok(range) => self.db.update(Resource::from(range.tb)).range((range.beg, range.end)),
@@ -612,7 +680,7 @@ impl Surreal {
 				} => PatchOp::change(&path, diff),
 			}),
 			None => {
-				return Ok(to_value(&update.await?.into_json())?);
+				return Ok(TArrayUnknown::from_value(update.await?)?);
 			}
 		};
 		// Loop through the rest of the patches and append them
@@ -637,7 +705,7 @@ impl Surreal {
 		}
 		// Execute the update statement
 		let response = patch.await?;
-		Ok(to_value(&response.into_json())?)
+		Ok(TArrayUnknown::from_value(response)?)
 	}
 
 	/// Delete all records, or a specific record
@@ -652,14 +720,14 @@ impl Surreal {
 	/// // Delete a specific record from a table
 	/// const record = await db.delete('person:h5wxrf2ewk8xjxosxtyc');
 	/// ```
-	pub async fn delete(&self, resource: String) -> Result<JsValue, Error> {
+	pub async fn delete(&self, resource: String) -> Result<TArrayRecordUnknown, Error> {
 		let response = match resource.parse::<Range>() {
 			Ok(range) => {
 				self.db.delete(Resource::from(range.tb)).range((range.beg, range.end)).await?
 			}
 			Err(_) => self.db.delete(Resource::from(resource)).await?,
 		};
-		Ok(to_value(&response.into_json())?)
+		Ok(TArrayRecordUnknown::from_value(response)?)
 	}
 
 	/// Return the version of the server
@@ -667,9 +735,9 @@ impl Surreal {
 	/// ```js
 	/// const version = await db.version();
 	/// ```
-	pub async fn version(&self) -> Result<JsValue, Error> {
+	pub async fn version(&self) -> Result<String, Error> {
 		let response = self.db.version().await?;
-		Ok(to_value(&response)?)
+		Ok(response.to_string())
 	}
 
 	/// Check whether the server is healthy or not
