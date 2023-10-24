@@ -1,13 +1,12 @@
 mod log;
 mod opt;
+mod types;
 
 use dmp::Diff;
 use opt::auth::Credentials;
 use opt::patch::Patch;
-use serde::Serialize;
 use serde_json::Value as Json;
 use serde_wasm_bindgen::from_value;
-use serde_wasm_bindgen::Serializer;
 use std::collections::VecDeque;
 use surrealdb::engine::any::Any;
 use surrealdb::opt::auth::Database;
@@ -20,155 +19,13 @@ use surrealdb::opt::Resource;
 use surrealdb::sql::Range;
 use surrealdb::sql::{Array, Value, json};
 use wasm_bindgen::prelude::*;
+use types::*;
 
 pub use crate::err::Error;
-
-// Converts a Rust value into a [`JsValue`].
-fn to_value<T: Serialize + ?Sized>(value: &T) -> Result<JsValue, serde_wasm_bindgen::Error> {
-	value.serialize(&Serializer::json_compatible())
-}
 
 #[wasm_bindgen(start)]
 pub fn setup() {
 	self::log::init();
-}
-
-#[wasm_bindgen(typescript_custom_section)]
-const ITEXT_STYLE: &'static str = r#"
-
-type SuperUserAuth = {
-	username: string;
-	password: string;
-};
-
-type NamespaceUserAuth = {
-	namespace: string;
-	username: string;
-	password: string;
-};
-
-type DatabaseUserAuth = {
-	namespace: string;
-	database: string;
-	username: string;
-	password: string;
-};
-
-type ScopeUserAuth = {
-	namespace: string;
-	database: string;
-	scope: string;
-	[k: string]: unknown;
-};
-
-type AnyAuth = SuperUserAuth | NamespaceUserAuth | DatabaseUserAuth | ScopeUserAuth;
-
-type CapabilitiesAllowDenyList = {
-	allow?: boolean | string[];
-	deny?: boolean | string[];
-};
-
-type ConnectionOptions = {
-    capacity?: number;
-	strict?: boolean;
-	notifications?: boolean;
-	query_timeout?: number;
-	transaction_timeout?: number;
-	tick_interval?: number;
-	user?: AnyAuth;
-	capabilities?: boolean | {
-		guest_access?: boolean;
-		functions?: boolean | string[] | CapabilitiesAllowDenyList;
-		network_targets?: boolean | string[] | CapabilitiesAllowDenyList;
-	}
-}
-
-type UseOptions = {
-	namespace?: string;
-	database?: string;
-};
-
-type BasePatch<T = string> = {
-	path: T;
-};
-
-export type AddPatch<T = string, U = unknown> = BasePatch<T> & {
-	op: "add";
-	value: U;
-};
-
-export type RemovePatch<T = string> = BasePatch<T> & {
-	op: "remove";
-};
-
-export type ReplacePatch<T = string, U = unknown> = BasePatch<T> & {
-	op: "replace";
-	value: U;
-};
-
-export type ChangePatch<T = string, U = string> = BasePatch<T> & {
-	op: "change";
-	value: U;
-};
-
-export type Patch =
-	| AddPatch
-	| RemovePatch
-	| ReplacePatch
-	| ChangePatch;
-"#;
-
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(typescript_type = "ConnectionOptions")]
-    pub type TConnectionOptions;
-    #[wasm_bindgen(typescript_type = "AnyAuth")]
-    pub type TAnyAuth;
-    #[wasm_bindgen(typescript_type = "ScopeUserAuth")]
-    pub type TScopeUserAuth;
-    #[wasm_bindgen(typescript_type = "UseOptions")]
-    pub type TUseOptions;
-    #[wasm_bindgen(typescript_type = "unknown")]
-    pub type TUnknown;
-    #[wasm_bindgen(typescript_type = "Record<string, unknown>")]
-    pub type TRecordUnknown;
-	#[wasm_bindgen(typescript_type = "unknown[]")]
-	pub type TArrayUnknown;
-	#[wasm_bindgen(typescript_type = "Record<string, unknown>[]")]
-	pub type TArrayRecordUnknown;
-	#[wasm_bindgen(typescript_type = "Patch[]")]
-	pub type TArrayPatch;
-}
-
-impl TArrayUnknown {
-	fn from_value(value: Value) -> Result<Self, Error> {
-		let value = match value {
-			Value::Array(_) => value,
-			_ => Value::Array(Array::from(value)),
-		};
-
-		let value = to_value(&value.into_json())?;
-		Ok(value.into())
-	}
-}
-
-impl TArrayRecordUnknown {
-	fn from_value(value: Value) -> Result<Self, Error> {
-		let value = match value {
-			Value::Array(v) => v,
-			_ => Array::from(value),
-		};
-
-		for v in value.clone() {
-			if !matches!(v, Value::Object(_)) {
-				return Err(Error::from("Encountered a non-object value in array"))
-			}
-		}
-
-		let value = Value::Array(value);
-		let value = to_value(&value.into_json())?;
-		Ok(value.into())
-	}
 }
 
 #[wasm_bindgen]
