@@ -17,8 +17,7 @@ use surrealdb::opt::Config;
 use surrealdb::opt::PatchOp;
 use surrealdb::opt::Resource;
 use surrealdb::sql::Range;
-use surrealdb::sql::Value;
-use surrealdb::sql::json;
+use surrealdb::sql::{Array, Value, json};
 use wasm_bindgen::prelude::*;
 
 pub use crate::err::Error;
@@ -28,9 +27,94 @@ fn to_value<T: Serialize + ?Sized>(value: &T) -> Result<JsValue, serde_wasm_bind
 	value.serialize(&Serializer::json_compatible())
 }
 
+fn array_response(values: Value) -> Result<Vec<JsValue>, Error> {
+	let values = match values {
+		Value::Array(v) => v,
+		v => Array::from(v)
+	};
+
+	let mut output = Vec::<JsValue>::new();
+	for v in values {
+		let v = to_value(&v.into_json())?;
+		output.push(v);
+	}
+
+	Ok(output)
+}
+
 #[wasm_bindgen(start)]
 pub fn setup() {
 	self::log::init();
+}
+
+#[wasm_bindgen(typescript_custom_section)]
+const ITEXT_STYLE: &'static str = r#"
+
+type SuperUserAuth = {
+	username: string;
+	password: string;
+};
+
+type NamespaceUserAuth = {
+	namespace: string;
+	username: string;
+	password: string;
+};
+
+type DatabaseUserAuth = {
+	namespace: string;
+	database: string;
+	username: string;
+	password: string;
+};
+
+type ScopeUserAuth = {
+	namespace: string;
+	database: string;
+	scope: string;
+	[k: string]: unknown;
+};
+
+type AnyAuth = SuperUserAuth | NamespaceUserAuth | DatabaseUserAuth | ScopeUserAuth;
+
+type CapabilitiesAllowDenyList = {
+	allow?: boolean | string[];
+	deny?: boolean | string[];
+};
+
+type ConnectionOptions = {
+    capacity?: number;
+	strict?: boolean;
+	notifications?: boolean;
+	query_timeout?: number;
+	transaction_timeout?: number;
+	tick_interval?: number;
+	user?: AnyAuth;
+	capabilities?: boolean | {
+		guest_access?: boolean;
+		functions?: boolean | string[] | CapabilitiesAllowDenyList;
+		network_targets?: boolean | string[] | CapabilitiesAllowDenyList;
+	}
+}
+
+type UseOptions = {
+	namespace?: string;
+	database?: string;
+};
+"#;
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(typescript_type = "ConnectionOptions")]
+    pub type TConnectionOptions;
+    #[wasm_bindgen(typescript_type = "AnyAuth")]
+    pub type TAnyAuth;
+    #[wasm_bindgen(typescript_type = "ScopeUserAuth")]
+    pub type TScopeUserAuth;
+    #[wasm_bindgen(typescript_type = "UseOptions")]
+    pub type TUseOptions;
+    #[wasm_bindgen(typescript_type = "unknown")]
+    pub type TUnknown;
 }
 
 #[wasm_bindgen]
@@ -137,7 +221,8 @@ impl Surreal {
 	///     },
 	/// });
 	/// ```
-	pub async fn connect(&self, endpoint: String, opts: JsValue) -> Result<(), Error> {
+	pub async fn connect(&self, endpoint: String, opts: Option<TConnectionOptions>) -> Result<(), Error> {
+		let opts = JsValue::from(opts);
 		let connect = match from_value::<Option<opt::endpoint::Options>>(opts)? {
 			Some(opts) => {
 				let capacity = opts.capacity;
@@ -159,21 +244,22 @@ impl Surreal {
 	/// const db = new Surreal();
 	///
 	/// // Switch to a namespace
-	/// await db.use({ ns: 'namespace' });
+	/// await db.use({ namespace: 'namespace' });
 	///
 	/// // Switch to a database
-	/// await db.use({ db: 'database' });
+	/// await db.use({ database: 'database' });
 	///
 	/// // Switch both
-	/// await db.use({ ns: 'namespace', db: 'database' });
+	/// await db.use({ namespace: 'namespace', database: 'database' });
 	/// ```
 	#[wasm_bindgen(js_name = use)]
-	pub async fn yuse(&self, value: JsValue) -> Result<(), Error> {
-		let opts: opt::yuse::Use = from_value(value)?;
-		match (opts.ns, opts.db) {
-			(Some(ns), Some(db)) => self.db.use_ns(ns).use_db(db).await.map_err(Into::into),
-			(Some(ns), None) => self.db.use_ns(ns).await.map_err(Into::into),
-			(None, Some(db)) => self.db.use_db(db).await.map_err(Into::into),
+	pub async fn yuse(&self, opts: Option<TUseOptions>) -> Result<(), Error> {
+		let opts = JsValue::from(opts);
+		let opts: opt::yuse::Use = from_value(opts)?;
+		match (opts.namespace, opts.database) {
+			(Some(namespace), Some(database)) => self.db.use_ns(namespace).use_db(database).await.map_err(Into::into),
+			(Some(namespace), None) => self.db.use_ns(namespace).await.map_err(Into::into),
+			(None, Some(database)) => self.db.use_db(database).await.map_err(Into::into),
 			(None, None) => Err("Select either namespace or database to use".into()),
 		}
 	}
@@ -183,7 +269,8 @@ impl Surreal {
 	/// ```js
 	/// await db.set('name', { first: 'Tobie', last: 'Morgan Hitchcock' });
 	/// ```
-	pub async fn set(&self, key: String, value: JsValue) -> Result<(), Error> {
+	pub async fn set(&self, key: String, value: TUnknown) -> Result<(), Error> {
+		let value = JsValue::from(value);
 		let value: Json = from_value(value)?;
 		self.db.set(key, value).await?;
 		Ok(())
@@ -210,7 +297,8 @@ impl Surreal {
 	///     password: 'password123'
 	/// });
 	/// ```
-	pub async fn signup(&self, credentials: JsValue) -> Result<JsValue, Error> {
+	pub async fn signup(&self, credentials: TScopeUserAuth) -> Result<String, Error> {
+		let credentials = JsValue::from(credentials);
 		match from_value::<Credentials>(credentials)? {
 			Credentials::Scope {
 				namespace,
@@ -227,7 +315,7 @@ impl Surreal {
 						scope: &scope,
 					})
 					.await?;
-				Ok(to_value(&response)?)
+				Ok(response.into_insecure_token())
 			}
 			Credentials::Database {
 				..
@@ -252,7 +340,8 @@ impl Surreal {
 	///     password: 'password123'
 	/// });
 	/// ```
-	pub async fn signin(&self, credentials: JsValue) -> Result<JsValue, Error> {
+	pub async fn signin(&self, credentials: TAnyAuth) -> Result<String, Error> {
+		let credentials = JsValue::from(credentials);
 		let token = match &from_value::<Credentials>(credentials)? {
 			Credentials::Scope {
 				namespace,
@@ -294,7 +383,7 @@ impl Surreal {
 			}),
 		}
 		.await?;
-		Ok(to_value(&token)?)
+		Ok(token.into_insecure_token())
 	}
 
 	/// Invalidates the authentication for the current connection
@@ -312,9 +401,9 @@ impl Surreal {
 	/// ```js
 	/// await db.authenticate('<secret token>');
 	/// ```
-	pub async fn authenticate(&self, token: String) -> Result<(), Error> {
+	pub async fn authenticate(&self, token: String) -> Result<bool, Error> {
 		self.db.authenticate(token).await?;
-		Ok(())
+		Ok(true)
 	}
 
 	/// Run a SurrealQL query against the database
@@ -326,7 +415,8 @@ impl Surreal {
 	/// // Run a query with bindings
 	/// const people = await db.query('SELECT * FROM type::table($table)', { table: 'person' });
 	/// ```
-	pub async fn query(&self, sql: String, bindings: JsValue) -> Result<JsValue, Error> {
+	pub async fn query(&self, sql: String, bindings: TUnknown) -> Result<Vec<JsValue>, Error> {
+		let bindings = JsValue::from(bindings);
 		let mut response = match bindings.is_undefined() {
 			true => self.db.query(sql).await?,
 			false => {
@@ -335,16 +425,16 @@ impl Surreal {
 			},
 		};
 		let num_statements = response.num_statements();
-		let response = if num_statements > 1 {
-			let mut output = Vec::<Value>::with_capacity(num_statements);
+		let response = {
+			let mut output = Vec::<JsValue>::with_capacity(num_statements);
 			for index in 0..num_statements {
-				output.push(response.take(index)?);
+				let v: Value = response.take(index)?;
+				let v = to_value(&v.into_json())?;
+				output.push(v);
 			}
-			Value::from(output)
-		} else {
-			response.take(0)?
+			output
 		};
-		Ok(to_value(&response.into_json())?)
+		Ok(response)
 	}
 
 	/// Select all records in a table, or a specific record
@@ -359,14 +449,15 @@ impl Surreal {
 	/// // Select a specific record from a table
 	/// const person = await db.select('person:h5wxrf2ewk8xjxosxtyc');
 	/// ```
-	pub async fn select(&self, resource: String) -> Result<JsValue, Error> {
+	pub async fn select(&self, resource: String) -> Result<Vec<JsValue>, Error> {
 		let response = match resource.parse::<Range>() {
 			Ok(range) => {
 				self.db.select(Resource::from(range.tb)).range((range.beg, range.end)).await?
 			}
 			Err(_) => self.db.select(Resource::from(resource)).await?,
 		};
-		Ok(to_value(&response.into_json())?)
+		let response = array_response(response)?;
+		Ok(response)
 	}
 
 	/// Create a record in the database
