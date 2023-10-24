@@ -1,6 +1,7 @@
 mod log;
 mod opt;
 
+use dmp::Diff;
 use opt::auth::Credentials;
 use opt::patch::Patch;
 use serde::Serialize;
@@ -110,29 +111,11 @@ export type ChangePatch<T = string, U = string> = BasePatch<T> & {
 	value: U;
 };
 
-export type CopyPatch<T = string, U = string> = BasePatch<T> & {
-	op: "copy";
-	from: U;
-};
-
-export type MovePatch<T = string, U = string> = BasePatch<T> & {
-	op: "move";
-	from: U;
-};
-
-export type TestPatch<T = string, U = unknown> = BasePatch<T> & {
-	op: "test";
-	value: U;
-};
-
 export type Patch =
 	| AddPatch
 	| RemovePatch
 	| ReplacePatch
-	| ChangePatch
-	| CopyPatch
-	| MovePatch
-	| TestPatch;
+	| ChangePatch;
 "#;
 
 #[wasm_bindgen]
@@ -147,6 +130,8 @@ extern "C" {
     pub type TUseOptions;
     #[wasm_bindgen(typescript_type = "unknown")]
     pub type TUnknown;
+    #[wasm_bindgen(typescript_type = "Record<string, unknown>")]
+    pub type TRecordUnknown;
 	#[wasm_bindgen(typescript_type = "unknown[]")]
 	pub type TArrayUnknown;
 	#[wasm_bindgen(typescript_type = "Record<string, unknown>[]")]
@@ -484,7 +469,7 @@ impl Surreal {
 	/// // Run a query with bindings
 	/// const people = await db.query('SELECT * FROM type::table($table)', { table: 'person' });
 	/// ```
-	pub async fn query(&self, sql: String, bindings: TUnknown) -> Result<TArrayUnknown, Error> {
+	pub async fn query(&self, sql: String, bindings: TRecordUnknown) -> Result<TArrayUnknown, Error> {
 		let bindings = JsValue::from(bindings);
 		let mut response = match bindings.is_undefined() {
 			true => self.db.query(sql).await?,
@@ -543,7 +528,8 @@ impl Surreal {
 	///     }
 	/// });
 	/// ```
-	pub async fn create(&self, resource: String, data: JsValue) -> Result<TArrayRecordUnknown, Error> {
+	pub async fn create(&self, resource: String, data: TRecordUnknown) -> Result<TArrayRecordUnknown, Error> {
+		let data = JsValue::from(data);
 		let resource = Resource::from(resource);
 		let response = match data.is_undefined() {
 			true => self.db.create(resource).await?,
@@ -585,7 +571,8 @@ impl Surreal {
 	///     }
 	/// });
 	/// ```
-	pub async fn update(&self, resource: String, data: JsValue) -> Result<TArrayRecordUnknown, Error> {
+	pub async fn update(&self, resource: String, data: TRecordUnknown) -> Result<TArrayRecordUnknown, Error> {
+		let data = JsValue::from(data);
 		let update = match resource.parse::<Range>() {
 			Ok(range) => self.db.update(Resource::from(range.tb)).range((range.beg, range.end)),
 			Err(_) => self.db.update(Resource::from(resource)),
@@ -618,7 +605,8 @@ impl Surreal {
 	///     marketing: true
 	/// });
 	/// ```
-	pub async fn merge(&self, resource: String, data: JsValue) -> Result<TArrayRecordUnknown, Error> {
+	pub async fn merge(&self, resource: String, data: TRecordUnknown) -> Result<TArrayRecordUnknown, Error> {
+		let data = JsValue::from(data);
 		let update = match resource.parse::<Range>() {
 			Ok(range) => self.db.update(Resource::from(range.tb)).range((range.beg, range.end)),
 			Err(_) => self.db.update(Resource::from(resource)),
@@ -652,7 +640,8 @@ impl Surreal {
 	///     value: false
 	/// }]);
 	/// ```
-	pub async fn patch(&self, resource: String, data: JsValue) -> Result<TArrayUnknown, Error> {
+	pub async fn patch(&self, resource: String, data: TArrayPatch) -> Result<TArrayRecordUnknown, Error> {
+		let data = JsValue::from(data);
 		// Prepare the update request
 		let update = match resource.parse::<Range>() {
 			Ok(range) => self.db.update(Resource::from(range.tb)).range((range.beg, range.end)),
@@ -676,11 +665,11 @@ impl Surreal {
 				} => PatchOp::replace(&path, value),
 				Patch::Change {
 					path,
-					diff,
-				} => PatchOp::change(&path, diff),
+					value,
+				} => PatchOp::change(&path, Diff { operation: 0, text: value }),
 			}),
 			None => {
-				return Ok(TArrayUnknown::from_value(update.await?)?);
+				return Ok(TArrayRecordUnknown::from_value(update.await?)?);
 			}
 		};
 		// Loop through the rest of the patches and append them
@@ -699,13 +688,13 @@ impl Surreal {
 				} => PatchOp::replace(&path, value),
 				Patch::Change {
 					path,
-					diff,
-				} => PatchOp::change(&path, diff),
+					value,
+				} => PatchOp::change(&path, Diff { operation: 0, text: value }),
 			});
 		}
 		// Execute the update statement
 		let response = patch.await?;
-		Ok(TArrayUnknown::from_value(response)?)
+		Ok(TArrayRecordUnknown::from_value(response)?)
 	}
 
 	/// Delete all records, or a specific record
