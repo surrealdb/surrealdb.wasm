@@ -339,8 +339,7 @@ impl Surreal {
 		let response = {
 			let mut output = Vec::<Value>::with_capacity(num_statements);
 			for index in 0..num_statements {
-				let v: Value = response.take(index)?;
-				output.push(v);
+				output.push(response.take(index)?);
 			}
 			Value::from(Array::from(output))
 		};
