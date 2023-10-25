@@ -91,26 +91,26 @@ export type Patch =
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(typescript_type = "ConnectionOptions")]
-    pub type TConnectionOptions;
+    pub type TsConnectionOptions;
     #[wasm_bindgen(typescript_type = "AnyAuth")]
-    pub type TAnyAuth;
+    pub type TsAnyAuth;
     #[wasm_bindgen(typescript_type = "ScopeUserAuth")]
-    pub type TScopeUserAuth;
+    pub type TsScopeUserAuth;
     #[wasm_bindgen(typescript_type = "UseOptions")]
-    pub type TUseOptions;
+    pub type TsUseOptions;
     #[wasm_bindgen(typescript_type = "unknown")]
-    pub type TUnknown;
+    pub type TsUnknown;
     #[wasm_bindgen(typescript_type = "Record<string, unknown>")]
-    pub type TRecordUnknown;
+    pub type TsRecordUnknown;
 	#[wasm_bindgen(typescript_type = "unknown[]")]
-	pub type TArrayUnknown;
+	pub type TsArrayUnknown;
 	#[wasm_bindgen(typescript_type = "Record<string, unknown>[]")]
-	pub type TArrayRecordUnknown;
+	pub type TsArrayRecordUnknown;
 	#[wasm_bindgen(typescript_type = "Patch[]")]
-	pub type TArrayPatch;
+	pub type TsArrayPatch;
 }
 
-impl TArrayUnknown {
+impl TsArrayUnknown {
 	pub fn from_value(value: Value) -> Result<Self, Error> {
 		let value = match value {
 			Value::Array(_) => value,
@@ -122,7 +122,7 @@ impl TArrayUnknown {
 	}
 }
 
-impl TArrayRecordUnknown {
+impl TsArrayRecordUnknown {
 	pub fn from_value(value: Value) -> Result<Self, Error> {
 		let value = match value {
 			Value::Array(v) => v,

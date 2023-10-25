@@ -132,7 +132,7 @@ impl Surreal {
 	///     },
 	/// });
 	/// ```
-	pub async fn connect(&self, endpoint: String, opts: Option<TConnectionOptions>) -> Result<(), Error> {
+	pub async fn connect(&self, endpoint: String, opts: Option<TsConnectionOptions>) -> Result<(), Error> {
 		let opts = JsValue::from(opts);
 		let connect = match from_value::<Option<opt::endpoint::Options>>(opts)? {
 			Some(opts) => {
@@ -164,7 +164,7 @@ impl Surreal {
 	/// await db.use({ namespace: 'namespace', database: 'database' });
 	/// ```
 	#[wasm_bindgen(js_name = use)]
-	pub async fn yuse(&self, opts: Option<TUseOptions>) -> Result<(), Error> {
+	pub async fn yuse(&self, opts: Option<TsUseOptions>) -> Result<(), Error> {
 		let opts = JsValue::from(opts);
 		let opts: opt::yuse::Use = from_value(opts)?;
 		match (opts.namespace, opts.database) {
@@ -180,7 +180,7 @@ impl Surreal {
 	/// ```js
 	/// await db.set('name', { first: 'Tobie', last: 'Morgan Hitchcock' });
 	/// ```
-	pub async fn set(&self, key: String, value: TUnknown) -> Result<(), Error> {
+	pub async fn set(&self, key: String, value: TsUnknown) -> Result<(), Error> {
 		let value = JsValue::from(value);
 		let value: Json = from_value(value)?;
 		self.db.set(key, value).await?;
@@ -208,7 +208,7 @@ impl Surreal {
 	///     password: 'password123'
 	/// });
 	/// ```
-	pub async fn signup(&self, credentials: TScopeUserAuth) -> Result<String, Error> {
+	pub async fn signup(&self, credentials: TsScopeUserAuth) -> Result<String, Error> {
 		let credentials = JsValue::from(credentials);
 		match from_value::<Credentials>(credentials)? {
 			Credentials::Scope {
@@ -251,7 +251,7 @@ impl Surreal {
 	///     password: 'password123'
 	/// });
 	/// ```
-	pub async fn signin(&self, credentials: TAnyAuth) -> Result<String, Error> {
+	pub async fn signin(&self, credentials: TsAnyAuth) -> Result<String, Error> {
 		let credentials = JsValue::from(credentials);
 		let token = match &from_value::<Credentials>(credentials)? {
 			Credentials::Scope {
@@ -326,7 +326,7 @@ impl Surreal {
 	/// // Run a query with bindings
 	/// const people = await db.query('SELECT * FROM type::table($table)', { table: 'person' });
 	/// ```
-	pub async fn query(&self, sql: String, bindings: Option<TRecordUnknown>) -> Result<TArrayUnknown, Error> {
+	pub async fn query(&self, sql: String, bindings: Option<TsRecordUnknown>) -> Result<TsArrayUnknown, Error> {
 		let bindings = JsValue::from(bindings);
 		let mut response = match bindings.is_undefined() {
 			true => self.db.query(sql).await?,
@@ -344,7 +344,7 @@ impl Surreal {
 			}
 			Value::from(Array::from(output))
 		};
-		Ok(TArrayUnknown::from_value(response)?)
+		Ok(TsArrayUnknown::from_value(response)?)
 	}
 
 	/// Select all records in a table, or a specific record
@@ -360,14 +360,14 @@ impl Surreal {
 	/// const person = await db.select('person:h5wxrf2ewk8xjxosxtyc');
 	/// ```
 	#[wasm_bindgen]
-	pub async fn select(&self, resource: String) -> Result<TArrayRecordUnknown, Error> {
+	pub async fn select(&self, resource: String) -> Result<TsArrayRecordUnknown, Error> {
 		let response = match resource.parse::<Range>() {
 			Ok(range) => {
 				self.db.select(Resource::from(range.tb)).range((range.beg, range.end)).await?
 			}
 			Err(_) => self.db.select(Resource::from(resource)).await?,
 		};
-		Ok(TArrayRecordUnknown::from_value(response)?)
+		Ok(TsArrayRecordUnknown::from_value(response)?)
 	}
 
 	/// Create a record in the database
@@ -385,7 +385,7 @@ impl Surreal {
 	///     }
 	/// });
 	/// ```
-	pub async fn create(&self, resource: String, data: Option<TRecordUnknown>) -> Result<TArrayRecordUnknown, Error> {
+	pub async fn create(&self, resource: String, data: Option<TsRecordUnknown>) -> Result<TsArrayRecordUnknown, Error> {
 		let data = JsValue::from(data);
 		let resource = Resource::from(resource);
 		let response = match data.is_undefined() {
@@ -395,7 +395,7 @@ impl Surreal {
 				self.db.create(resource).content(data).await?
 			},
 		};
-		Ok(TArrayRecordUnknown::from_value(response)?)
+		Ok(TsArrayRecordUnknown::from_value(response)?)
 	}
 
 	/// Update all records in a table, or a specific record
@@ -428,7 +428,7 @@ impl Surreal {
 	///     }
 	/// });
 	/// ```
-	pub async fn update(&self, resource: String, data: Option<TRecordUnknown>) -> Result<TArrayRecordUnknown, Error> {
+	pub async fn update(&self, resource: String, data: Option<TsRecordUnknown>) -> Result<TsArrayRecordUnknown, Error> {
 		let data = JsValue::from(data);
 		let update = match resource.parse::<Range>() {
 			Ok(range) => self.db.update(Resource::from(range.tb)).range((range.beg, range.end)),
@@ -441,7 +441,7 @@ impl Surreal {
 				update.content(data).await?
 			},
 		};
-		Ok(TArrayRecordUnknown::from_value(response)?)
+		Ok(TsArrayRecordUnknown::from_value(response)?)
 	}
 
 	/// Merge records in a table with specified data
@@ -462,7 +462,7 @@ impl Surreal {
 	///     marketing: true
 	/// });
 	/// ```
-	pub async fn merge(&self, resource: String, data: TRecordUnknown) -> Result<TArrayRecordUnknown, Error> {
+	pub async fn merge(&self, resource: String, data: TsRecordUnknown) -> Result<TsArrayRecordUnknown, Error> {
 		let data = JsValue::from(data);
 		let update = match resource.parse::<Range>() {
 			Ok(range) => self.db.update(Resource::from(range.tb)).range((range.beg, range.end)),
@@ -470,7 +470,7 @@ impl Surreal {
 		};
 		let data = json(&from_value::<Json>(data)?.to_string())?;
 		let response = update.merge(data).await?;
-		Ok(TArrayRecordUnknown::from_value(response)?)
+		Ok(TsArrayRecordUnknown::from_value(response)?)
 	}
 
 	/// Patch all records in a table or a specific record
@@ -497,7 +497,7 @@ impl Surreal {
 	///     value: false
 	/// }]);
 	/// ```
-	pub async fn patch(&self, resource: String, data: TArrayPatch) -> Result<TArrayRecordUnknown, Error> {
+	pub async fn patch(&self, resource: String, data: TsArrayPatch) -> Result<TsArrayRecordUnknown, Error> {
 		let data = JsValue::from(data);
 		// Prepare the update request
 		let update = match resource.parse::<Range>() {
@@ -526,7 +526,7 @@ impl Surreal {
 				} => PatchOp::change(&path, Diff { operation: 0, text: value }),
 			}),
 			None => {
-				return Ok(TArrayRecordUnknown::from_value(update.await?)?);
+				return Ok(TsArrayRecordUnknown::from_value(update.await?)?);
 			}
 		};
 		// Loop through the rest of the patches and append them
@@ -551,7 +551,7 @@ impl Surreal {
 		}
 		// Execute the update statement
 		let response = patch.await?;
-		Ok(TArrayRecordUnknown::from_value(response)?)
+		Ok(TsArrayRecordUnknown::from_value(response)?)
 	}
 
 	/// Delete all records, or a specific record
@@ -566,14 +566,14 @@ impl Surreal {
 	/// // Delete a specific record from a table
 	/// const record = await db.delete('person:h5wxrf2ewk8xjxosxtyc');
 	/// ```
-	pub async fn delete(&self, resource: String) -> Result<TArrayRecordUnknown, Error> {
+	pub async fn delete(&self, resource: String) -> Result<TsArrayRecordUnknown, Error> {
 		let response = match resource.parse::<Range>() {
 			Ok(range) => {
 				self.db.delete(Resource::from(range.tb)).range((range.beg, range.end)).await?
 			}
 			Err(_) => self.db.delete(Resource::from(resource)).await?,
 		};
-		Ok(TArrayRecordUnknown::from_value(response)?)
+		Ok(TsArrayRecordUnknown::from_value(response)?)
 	}
 
 	/// Return the version of the server
