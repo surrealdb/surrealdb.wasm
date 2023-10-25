@@ -353,7 +353,7 @@ impl Surreal {
 			}
 			Value::from(Array::from(output))
 		};
-		Ok(TsArrayUnknown::from_value(response)?)
+		TsArrayUnknown::from_value(response)
 	}
 
 	/// Select all records in a table, or a specific record
@@ -375,7 +375,7 @@ impl Surreal {
 			}
 			Err(_) => self.db.select(Resource::from(resource)).await?,
 		};
-		Ok(TsArrayRecordUnknown::from_value(response)?)
+		TsArrayRecordUnknown::from_value(response)
 	}
 
 	/// Create a record in the database
@@ -407,7 +407,7 @@ impl Surreal {
 				self.db.create(resource).content(data).await?
 			}
 		};
-		Ok(TsArrayRecordUnknown::from_value(response)?)
+		TsArrayRecordUnknown::from_value(response)
 	}
 
 	/// Update all records in a table, or a specific record
@@ -457,7 +457,7 @@ impl Surreal {
 				update.content(data).await?
 			}
 		};
-		Ok(TsArrayRecordUnknown::from_value(response)?)
+		TsArrayRecordUnknown::from_value(response)
 	}
 
 	/// Merge records in a table with specified data
@@ -490,7 +490,7 @@ impl Surreal {
 		};
 		let data = json(&from_value::<Json>(data)?.to_string())?;
 		let response = update.merge(data).await?;
-		Ok(TsArrayRecordUnknown::from_value(response)?)
+		TsArrayRecordUnknown::from_value(response)
 	}
 
 	/// Patch all records in a table or a specific record
@@ -556,7 +556,7 @@ impl Surreal {
 				),
 			}),
 			None => {
-				return Ok(TsArrayRecordUnknown::from_value(update.await?)?);
+				return TsArrayRecordUnknown::from_value(update.await?);
 			}
 		};
 		// Loop through the rest of the patches and append them
@@ -587,7 +587,7 @@ impl Surreal {
 		}
 		// Execute the update statement
 		let response = patch.await?;
-		Ok(TsArrayRecordUnknown::from_value(response)?)
+		TsArrayRecordUnknown::from_value(response)
 	}
 
 	/// Delete all records, or a specific record
@@ -609,7 +609,7 @@ impl Surreal {
 			}
 			Err(_) => self.db.delete(Resource::from(resource)).await?,
 		};
-		Ok(TsArrayRecordUnknown::from_value(response)?)
+		TsArrayRecordUnknown::from_value(response)
 	}
 
 	/// Return the version of the server
