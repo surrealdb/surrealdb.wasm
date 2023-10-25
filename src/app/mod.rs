@@ -368,7 +368,6 @@ impl Surreal {
 	/// // Select a specific record from a table
 	/// const person = await db.select('person:h5wxrf2ewk8xjxosxtyc');
 	/// ```
-	#[wasm_bindgen]
 	pub async fn select(&self, resource: String) -> Result<TsArrayRecordUnknown, Error> {
 		let response = match resource.parse::<Range>() {
 			Ok(range) => {
