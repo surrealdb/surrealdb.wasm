@@ -1,7 +1,7 @@
-use wasm_bindgen::prelude::*;
-use surrealdb::sql::{Array, Value};
-use crate::err::Error;
 use crate::app::opt::to_value::to_value;
+use crate::err::Error;
+use surrealdb::sql::{Array, Value};
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(typescript_custom_section)]
 const ITEXT_STYLE: &'static str = r#"
@@ -90,18 +90,18 @@ export type Patch =
 
 #[wasm_bindgen]
 extern "C" {
-    #[wasm_bindgen(typescript_type = "ConnectionOptions")]
-    pub type TsConnectionOptions;
-    #[wasm_bindgen(typescript_type = "AnyAuth")]
-    pub type TsAnyAuth;
-    #[wasm_bindgen(typescript_type = "ScopeUserAuth")]
-    pub type TsScopeUserAuth;
-    #[wasm_bindgen(typescript_type = "UseOptions")]
-    pub type TsUseOptions;
-    #[wasm_bindgen(typescript_type = "unknown")]
-    pub type TsUnknown;
-    #[wasm_bindgen(typescript_type = "Record<string, unknown>")]
-    pub type TsRecordUnknown;
+	#[wasm_bindgen(typescript_type = "ConnectionOptions")]
+	pub type TsConnectionOptions;
+	#[wasm_bindgen(typescript_type = "AnyAuth")]
+	pub type TsAnyAuth;
+	#[wasm_bindgen(typescript_type = "ScopeUserAuth")]
+	pub type TsScopeUserAuth;
+	#[wasm_bindgen(typescript_type = "UseOptions")]
+	pub type TsUseOptions;
+	#[wasm_bindgen(typescript_type = "unknown")]
+	pub type TsUnknown;
+	#[wasm_bindgen(typescript_type = "Record<string, unknown>")]
+	pub type TsRecordUnknown;
 	#[wasm_bindgen(typescript_type = "unknown[]")]
 	pub type TsArrayUnknown;
 	#[wasm_bindgen(typescript_type = "Record<string, unknown>[]")]
@@ -131,7 +131,7 @@ impl TsArrayRecordUnknown {
 
 		for v in value.clone() {
 			if !matches!(v, Value::Object(_)) {
-				return Err(Error::from("Encountered a non-object value in array"))
+				return Err(Error::from("Encountered a non-object value in array"));
 			}
 		}
 

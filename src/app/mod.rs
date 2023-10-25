@@ -17,9 +17,9 @@ use surrealdb::opt::Config;
 use surrealdb::opt::PatchOp;
 use surrealdb::opt::Resource;
 use surrealdb::sql::Range;
-use surrealdb::sql::{Array, Value, json};
-use wasm_bindgen::prelude::*;
+use surrealdb::sql::{json, Array, Value};
 use types::*;
+use wasm_bindgen::prelude::*;
 
 pub use crate::err::Error;
 
@@ -132,7 +132,11 @@ impl Surreal {
 	///     },
 	/// });
 	/// ```
-	pub async fn connect(&self, endpoint: String, opts: Option<TsConnectionOptions>) -> Result<(), Error> {
+	pub async fn connect(
+		&self,
+		endpoint: String,
+		opts: Option<TsConnectionOptions>,
+	) -> Result<(), Error> {
 		let opts = JsValue::from(opts);
 		let connect = match from_value::<Option<opt::endpoint::Options>>(opts)? {
 			Some(opts) => {
@@ -168,7 +172,9 @@ impl Surreal {
 		let opts = JsValue::from(opts);
 		let opts: opt::yuse::Use = from_value(opts)?;
 		match (opts.namespace, opts.database) {
-			(Some(namespace), Some(database)) => self.db.use_ns(namespace).use_db(database).await.map_err(Into::into),
+			(Some(namespace), Some(database)) => {
+				self.db.use_ns(namespace).use_db(database).await.map_err(Into::into)
+			}
 			(Some(namespace), None) => self.db.use_ns(namespace).await.map_err(Into::into),
 			(None, Some(database)) => self.db.use_db(database).await.map_err(Into::into),
 			(None, None) => Err("Select either namespace or database to use".into()),
@@ -326,14 +332,18 @@ impl Surreal {
 	/// // Run a query with bindings
 	/// const people = await db.query('SELECT * FROM type::table($table)', { table: 'person' });
 	/// ```
-	pub async fn query(&self, sql: String, bindings: Option<TsRecordUnknown>) -> Result<TsArrayUnknown, Error> {
+	pub async fn query(
+		&self,
+		sql: String,
+		bindings: Option<TsRecordUnknown>,
+	) -> Result<TsArrayUnknown, Error> {
 		let bindings = JsValue::from(bindings);
 		let mut response = match bindings.is_undefined() {
 			true => self.db.query(sql).await?,
 			false => {
 				let bindings = json(&from_value::<Json>(bindings)?.to_string())?;
 				self.db.query(sql).bind(bindings).await?
-			},
+			}
 		};
 		let num_statements = response.num_statements();
 		let response = {
@@ -384,7 +394,11 @@ impl Surreal {
 	///     }
 	/// });
 	/// ```
-	pub async fn create(&self, resource: String, data: Option<TsRecordUnknown>) -> Result<TsArrayRecordUnknown, Error> {
+	pub async fn create(
+		&self,
+		resource: String,
+		data: Option<TsRecordUnknown>,
+	) -> Result<TsArrayRecordUnknown, Error> {
 		let data = JsValue::from(data);
 		let resource = Resource::from(resource);
 		let response = match data.is_undefined() {
@@ -392,7 +406,7 @@ impl Surreal {
 			false => {
 				let data = json(&from_value::<Json>(data)?.to_string())?;
 				self.db.create(resource).content(data).await?
-			},
+			}
 		};
 		Ok(TsArrayRecordUnknown::from_value(response)?)
 	}
@@ -427,7 +441,11 @@ impl Surreal {
 	///     }
 	/// });
 	/// ```
-	pub async fn update(&self, resource: String, data: Option<TsRecordUnknown>) -> Result<TsArrayRecordUnknown, Error> {
+	pub async fn update(
+		&self,
+		resource: String,
+		data: Option<TsRecordUnknown>,
+	) -> Result<TsArrayRecordUnknown, Error> {
 		let data = JsValue::from(data);
 		let update = match resource.parse::<Range>() {
 			Ok(range) => self.db.update(Resource::from(range.tb)).range((range.beg, range.end)),
@@ -438,7 +456,7 @@ impl Surreal {
 			false => {
 				let data = json(&from_value::<Json>(data)?.to_string())?;
 				update.content(data).await?
-			},
+			}
 		};
 		Ok(TsArrayRecordUnknown::from_value(response)?)
 	}
@@ -461,7 +479,11 @@ impl Surreal {
 	///     marketing: true
 	/// });
 	/// ```
-	pub async fn merge(&self, resource: String, data: TsRecordUnknown) -> Result<TsArrayRecordUnknown, Error> {
+	pub async fn merge(
+		&self,
+		resource: String,
+		data: TsRecordUnknown,
+	) -> Result<TsArrayRecordUnknown, Error> {
 		let data = JsValue::from(data);
 		let update = match resource.parse::<Range>() {
 			Ok(range) => self.db.update(Resource::from(range.tb)).range((range.beg, range.end)),
@@ -496,7 +518,11 @@ impl Surreal {
 	///     value: false
 	/// }]);
 	/// ```
-	pub async fn patch(&self, resource: String, data: TsArrayPatch) -> Result<TsArrayRecordUnknown, Error> {
+	pub async fn patch(
+		&self,
+		resource: String,
+		data: TsArrayPatch,
+	) -> Result<TsArrayRecordUnknown, Error> {
 		let data = JsValue::from(data);
 		// Prepare the update request
 		let update = match resource.parse::<Range>() {
@@ -522,7 +548,13 @@ impl Surreal {
 				Patch::Change {
 					path,
 					value,
-				} => PatchOp::change(&path, Diff { operation: 0, text: value }),
+				} => PatchOp::change(
+					&path,
+					Diff {
+						operation: 0,
+						text: value,
+					},
+				),
 			}),
 			None => {
 				return Ok(TsArrayRecordUnknown::from_value(update.await?)?);
@@ -545,7 +577,13 @@ impl Surreal {
 				Patch::Change {
 					path,
 					value,
-				} => PatchOp::change(&path, Diff { operation: 0, text: value }),
+				} => PatchOp::change(
+					&path,
+					Diff {
+						operation: 0,
+						text: value,
+					},
+				),
 			});
 		}
 		// Execute the update statement
