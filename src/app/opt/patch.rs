@@ -1,13 +1,5 @@
-use dmp::Diff;
 use serde::Deserialize;
 use serde_json::Value;
-
-#[derive(Deserialize)]
-#[serde(remote = "Diff")]
-struct DiffDef {
-	operation: i32,
-	text: String,
-}
 
 #[derive(Deserialize)]
 #[serde(tag = "op")]
@@ -22,11 +14,10 @@ pub enum Patch {
 	},
 	Replace {
 		path: String,
-		value: Value,
+		value: String,
 	},
 	Change {
 		path: String,
-		#[serde(with = "DiffDef")]
-		diff: Diff,
+		value: String,
 	},
 }
