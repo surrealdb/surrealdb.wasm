@@ -129,8 +129,8 @@ impl TsArrayRecordUnknown {
 			_ => Array::from(value),
 		};
 
-		for v in value.clone() {
-			if !matches!(v, Value::Object(_)) {
+		for v in &value {
+			if !v.is_object() {
 				return Err(Error::from("Encountered a non-object value in array"));
 			}
 		}
