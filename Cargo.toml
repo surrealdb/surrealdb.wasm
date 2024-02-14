@@ -43,7 +43,7 @@ surrealdb = { version = "1.2.0", default-features = false }
 wasm-bindgen = "0.2.91"
 wasm-bindgen-futures = "0.4.41"
 wasm-streams = "0.4.0"
-web-sys = { version = "0.3.68", features = ["console"] }
+web-sys = { version = "0.3.68", features = ["console", "ReadableStream"] }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.41"

@@ -393,12 +393,21 @@ impl Surreal {
 	/// const stream = await db.live('person:jane..john');
 	///
 	/// // Live select a specific record from a table
-	/// const stream = await db.live('person:h5wxrf2ewk8xjxosxtyc');
+	/// const stream = await db.live('person:jane');
+	///
+	/// // Get a reader
+	/// const reader = stream.getReader();
 	///
 	/// // Listen for changes
-	/// for await (const chunk of stream) {
-	///   // Do something with each 'chunk'
-	///   console.log(chunk);
+	/// while (true) {
+	///   // Read from the stream
+	///   const {done, notification} = await reader.read();
+	///
+	///   // Do something with each notification
+	///   console.log(notification);
+	///
+	///   // Exit the loop if done
+	///   if (done) break;
 	/// }
 	/// ```
 	pub async fn live(&self, resource: String) -> Result<sys::ReadableStream, Error> {
