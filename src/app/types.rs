@@ -129,7 +129,7 @@ impl TsArrayRecordUnknown {
 			_ => Array::from(value),
 		};
 
-		for v in &value {
+		for v in value.iter() {
 			if !v.is_object() {
 				return Err(Error::from("Encountered a non-object value in array"));
 			}

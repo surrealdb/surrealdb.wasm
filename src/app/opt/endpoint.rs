@@ -38,6 +38,7 @@ pub enum CapabilitiesConfig {
 	Capabilities {
 		scripting: Option<bool>,
 		guest_access: Option<bool>,
+		live_query_notifications: Option<bool>,
 		functions: Option<Targets>,
 		network_targets: Option<Targets>,
 	},
@@ -69,10 +70,6 @@ impl TryFrom<Options> for Config {
 
 		if let Some(strict) = opts.strict {
 			config = config.set_strict(strict);
-		}
-
-		if let Some(notifications) = opts.notifications {
-			config = config.set_notifications(notifications);
 		}
 
 		if let Some(query_timeout) = opts.query_timeout {
@@ -131,6 +128,7 @@ impl TryFrom<CapabilitiesConfig> for capabilities::Capabilities {
 			CapabilitiesConfig::Capabilities {
 				scripting,
 				guest_access,
+				live_query_notifications,
 				functions,
 				network_targets,
 			} => {
@@ -142,6 +140,11 @@ impl TryFrom<CapabilitiesConfig> for capabilities::Capabilities {
 
 				if let Some(guest_access) = guest_access {
 					capabilities = capabilities.with_guest_access(guest_access);
+				}
+
+				if let Some(live_query_notifications) = live_query_notifications {
+					capabilities =
+						capabilities.with_live_query_notifications(live_query_notifications);
 				}
 
 				if let Some(functions) = functions {

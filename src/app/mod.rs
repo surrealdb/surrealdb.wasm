@@ -70,9 +70,6 @@ impl Surreal {
 	/// // Enable strict mode on a local engine
 	/// await db.connect('indxdb://MyDatabase', { strict: true });
 	///
-	/// // Enable notifications
-	/// await db.connect('indxdb://MyDatabase', { notifications: true });
-	///
 	/// // Set query timeout time in seconds
 	/// await db.connect('indxdb://MyDatabase', { query_timeout: 60 });
 	///
@@ -93,6 +90,9 @@ impl Surreal {
 	///
 	/// // Allow guest access
 	/// await db.connect('indxdb://MyDatabase', { capabilities: { guest_access: true } });
+	///
+	/// // Enable live query notifications
+	/// await db.connect('indxdb://MyDatabase', { capabilities: { live_query_notifications: true } });
 	///
 	/// // Allow all SurrealQL functions
 	/// await db.connect('indxdb://MyDatabase', { capabilities: { functions: true } });
