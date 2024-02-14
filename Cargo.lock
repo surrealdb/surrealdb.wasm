@@ -2829,6 +2829,7 @@ dependencies = [
  "console_error_panic_hook",
  "dmp",
  "fern",
+ "futures",
  "log",
  "serde",
  "serde-wasm-bindgen",
@@ -2837,6 +2838,7 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-bindgen-test",
+ "wasm-streams",
  "web-sys",
 ]
 
