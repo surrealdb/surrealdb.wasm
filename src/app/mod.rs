@@ -3,8 +3,12 @@ mod opt;
 mod types;
 
 use dmp::Diff;
+use futures::StreamExt;
 use opt::auth::Credentials;
 use opt::patch::Patch;
+use opt::to_value::to_value;
+use opt::AsStr as _;
+use serde_json::json;
 use serde_json::Value as Json;
 use serde_wasm_bindgen::from_value;
 use std::collections::VecDeque;
@@ -20,6 +24,8 @@ use surrealdb::sql::Range;
 use surrealdb::sql::{json, Array, Value};
 use types::*;
 use wasm_bindgen::prelude::*;
+use wasm_streams::readable::sys;
+use wasm_streams::readable::ReadableStream;
 
 pub use crate::err::Error;
 
@@ -376,6 +382,56 @@ impl Surreal {
 			Err(_) => self.db.select(Resource::from(resource)).await?,
 		};
 		TsArrayRecordUnknown::from_value(response)
+	}
+
+	/// Live select all records in a table, or a specific record
+	///
+	/// ```js
+	/// // Live select all records from a table
+	/// const stream = await db.live('person');
+	///
+	/// // Live select a range records from a table
+	/// const stream = await db.live('person:jane..john');
+	///
+	/// // Live select a specific record from a table
+	/// const stream = await db.live('person:jane');
+	///
+	/// // Get a reader
+	/// const reader = stream.getReader();
+	///
+	/// // Listen for changes
+	/// while (true) {
+	///   // Read from the stream
+	///   const {done, notification} = await reader.read();
+	///
+	///   // Do something with each notification
+	///   console.log(notification);
+	///
+	///   // Exit the loop if done
+	///   if (done) break;
+	/// }
+	/// ```
+	pub async fn live(&self, resource: String) -> Result<sys::ReadableStream, Error> {
+		let stream = match resource.parse::<Range>() {
+			Ok(range) => {
+				self.db
+					.select(Resource::from(range.tb))
+					.range((range.beg, range.end))
+					.live()
+					.into_owned()
+					.await?
+			}
+			Err(_) => self.db.select(Resource::from(resource)).live().into_owned().await?,
+		};
+		let response = stream.map(|notification| {
+			let json = json!({
+				"id": notification.query_id,
+				"action": notification.action.as_str(),
+				"result": notification.data.into_json(),
+			});
+			to_value(&json).map_err(Into::into)
+		});
+		Ok(ReadableStream::from_stream(response).into_raw())
 	}
 
 	/// Create a record in the database
