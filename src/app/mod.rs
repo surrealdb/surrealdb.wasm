@@ -7,6 +7,7 @@ use futures::StreamExt;
 use opt::auth::Credentials;
 use opt::patch::Patch;
 use opt::to_value::to_value;
+use opt::AsStr as _;
 use serde_json::json;
 use serde_json::Value as Json;
 use serde_wasm_bindgen::from_value;
@@ -425,7 +426,7 @@ impl Surreal {
 		let response = stream.map(|notification| {
 			let json = json!({
 				"id": notification.query_id,
-				"action": format!("{:?}", notification.action).to_ascii_uppercase(),
+				"action": notification.action.as_str(),
 				"result": notification.data.into_json(),
 			});
 			to_value(&json).map_err(Into::into)

@@ -119,31 +119,37 @@ try {
 
 	// Delete all people
 	await db.delete("person");
-
-	// Live select all records from a table
-	const stream = await db.live('person');
-
-	// Live select a range records from a table
-	const stream = await db.live('person:jane..john');
-
-	// Live select a specific record from a table
-	const stream = await db.live('person:jane');
-
-	// Get a reader
-	const reader = stream.getReader();
-
-	// Listen for changes
-	while (true) {
-		// Read from the stream
-		const {done, notification} = await reader.read();
-
-		// Do something with each notification
-		console.log(notification);
-
-		// Exit the loop if done
-		if (done) break;
-	}
 } catch (e) {
 	console.error("ERROR", e);
+}
+```
+
+### Live Query API
+The live query API is very similar to that of the `select` method. The only differences are that it uses `live`
+in place of `select` and it returns [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream).
+
+```js
+// Live select all records from a table
+const stream = await db.live('person');
+
+// Live select a range records from a table
+const stream = await db.live('person:jane..john');
+
+// Live select a specific record from a table
+const stream = await db.live('person:jane');
+
+// Get a reader
+const reader = stream.getReader();
+
+// Listen for changes
+while (true) {
+	// Read from the stream
+	const {done, notification} = await reader.read();
+
+	// Do something with each notification
+	console.log(notification);
+
+	// Exit the loop if done
+	if (done) break;
 }
 ```
