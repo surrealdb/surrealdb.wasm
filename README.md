@@ -146,10 +146,10 @@ while (true) {
 	// Read from the stream
 	const { done, value } = await reader.read();
 
-	// Do something with each notification
-	console.log(value);
-
 	// Exit the loop if done
 	if (done) break;
+
+	// Do something with each notification
+	console.log(value);
 }
 ```
