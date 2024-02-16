@@ -144,10 +144,10 @@ const reader = stream.getReader();
 // Listen for changes
 while (true) {
 	// Read from the stream
-	const {done, notification} = await reader.read();
+	const { done, value } = await reader.read();
 
 	// Do something with each notification
-	console.log(notification);
+	console.log(value);
 
 	// Exit the loop if done
 	if (done) break;
