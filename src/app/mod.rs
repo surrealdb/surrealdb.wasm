@@ -1,5 +1,6 @@
 mod log;
 mod opt;
+mod rpc;
 mod types;
 
 use dmp::Diff;
@@ -11,8 +12,11 @@ use opt::AsStr as _;
 use serde_json::json;
 use serde_json::Value as Json;
 use serde_wasm_bindgen::from_value;
-use std::collections::VecDeque;
+use std::collections::{BTreeMap, VecDeque};
+use std::fmt::format;
+use surrealdb::dbs::Session;
 use surrealdb::engine::any::Any;
+use surrealdb::kvs::Datastore;
 use surrealdb::opt::auth::Database;
 use surrealdb::opt::auth::Namespace;
 use surrealdb::opt::auth::Root;
@@ -20,12 +24,15 @@ use surrealdb::opt::auth::Scope;
 use surrealdb::opt::Config;
 use surrealdb::opt::PatchOp;
 use surrealdb::opt::Resource;
+use surrealdb::rpc::RpcError;
+use surrealdb::rpc::{Data, RpcContext};
 use surrealdb::sql::Range;
 use surrealdb::sql::{json, Array, Value};
 use types::*;
 use wasm_bindgen::prelude::*;
 use wasm_streams::readable::sys;
 use wasm_streams::readable::ReadableStream;
+use web_sys::js_sys::Uint8Array;
 
 pub use crate::err::Error;
 
