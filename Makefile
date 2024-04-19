@@ -25,9 +25,9 @@ clean:
 
 .PHONY: serve
 serve:
-	npm run build
-	npm run serve
+	pnpm run build
+	pnpm run serve
 
 .PHONY: build
 build:
-	npm run build
+	pnpm run build
