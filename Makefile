@@ -21,7 +21,7 @@ test:
 .PHONY: clean
 clean:
 	cargo clean
-	rm -rf compiled/ dist/ target/
+	rm -rf compiled/ dist/ target/ lib/
 
 .PHONY: serve
 serve:
