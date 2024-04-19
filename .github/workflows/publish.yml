@@ -14,6 +14,11 @@ jobs:
         with:
           node-version: '18.x'
           registry-url: 'https://registry.npmjs.org'
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 8
       - name: "Install wasm-pack"
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
