@@ -1,8 +1,11 @@
-// @deno-types="../dist/embedded/index.d.ts"
 import { ConnectionOptions, SurrealWasmEngine as Swe } from "../dist/embedded";
 import { ConnectionStatus, ConnectionUnavailable, decodeCbor, Emitter, encodeCbor, Engine, Engines, EngineEvents, RpcRequest, RpcResponse, UnexpectedConnectionError, UnexpectedServerResponse } from "surrealdb.js";
-import { getIncrementalID } from "./getIncrementalId";
 import z from 'zod';
+
+let id = 0;
+function getIncrementalID() {
+	return (id = (id + 1) % Number.MAX_SAFE_INTEGER).toString();
+}
 
 export function surrealdbWasmEngines(opts?: ConnectionOptions) {
 	class WasmEmbeddedEngine implements Engine {
