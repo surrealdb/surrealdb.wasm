@@ -18,20 +18,14 @@
   "exports": {
     ".": {
       "types": "./lib/embedded.d.ts",
-      "default": "./lib/embedded.js",
-      "bun": "./lib/embedded.js",
-      "browser": "./dist/embedded/web.js",
-      "deno": "./lib/embedded.js",
-      "import": "./lib/embedded.js",
-      "react-native": "./lib/embedded.js"
+      "default": "./lib/embedded.js"
     }
   },
   "scripts": {
     "serve": "esbuild --bundle --servedir=.",
-    "build": "pnpm compile && pnpm build-literal && tsc && pnpm build-web",
+    "build": "pnpm compile && pnpm build-literal && tsc",
     "compile": "wasm-pack build --release --target deno --out-name index --out-dir compiled/embedded --no-default-features --features kv-indxdb,kv-mem",
-    "build-literal": "node build/index.js",
-    "build-web": "node build/web.js"
+    "build-literal": "node build/index.js"
   },
   "devDependencies": {
     "esbuild": "^0.17.19",
