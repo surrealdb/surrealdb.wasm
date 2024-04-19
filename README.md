@@ -64,7 +64,6 @@ import { Surreal } from 'https://unpkg.com/surrealdb.wasm/lib/ws.js';
 import { Surreal } from 'https://unpkg.com/surrealdb.wasm/lib/http.js';
 ```
 
-
 <h2><img height="20" src="https://github.com/surrealdb/surrealdb/blob/main/img/features.svg?raw=true">&nbsp;&nbsp;Quick look</h2>
 
 This library enables simple and advanced querying of an embedded or remote database. By default, all remote connections to SurrealDB are made over WebSockets, and automatically reconnect when the connection is terminated.
