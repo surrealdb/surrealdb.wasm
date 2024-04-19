@@ -64,7 +64,7 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions) {
 		async disconnect(): Promise<void> {
 			this.connection = {};
 			await this.ready;
-			this.db.free();
+			this.db?.free();
 			delete this.db;
 			await this.reader;
 			delete this.reader;
