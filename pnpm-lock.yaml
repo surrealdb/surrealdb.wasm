@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   surrealdb.js:
-    specifier: 1.0.0-beta.3
-    version: 1.0.0-beta.3
+    specifier: 1.0.0-beta.4
+    version: 1.0.0-beta.4
   zod:
     specifier: ^3.22.5
     version: 3.22.5
@@ -308,8 +308,8 @@ packages:
     requiresBuild: true
     dev: false
 
-  /surrealdb.js@1.0.0-beta.3:
-    resolution: {integrity: sha512-m0pYIB1ugTVL/bkUvc8PESe4s8N6At/nuVKIjOhKFAWDQU+2CdAQiwRJVgm9T3qISnP4x8smShiPTZW8W/HIfA==}
+  /surrealdb.js@1.0.0-beta.4:
+    resolution: {integrity: sha512-pGOMuPz8OO+bgpmmPmfUPtopz8y1J97dCSsfzRaVkYdT/+fSMWqV3ftJYp9egX1IzTxK78gIQCE25oXfvALlsQ==}
     dependencies:
       '@icholy/duration': 5.1.0
       cbor-redux: 1.0.0
