@@ -1,34 +1,14 @@
 use crate::err::Error;
 use serde::Deserialize;
 use std::collections::HashSet;
-use std::time::Duration;
-use surrealdb::opt::auth::Root;
 use surrealdb::opt::capabilities;
-use surrealdb::opt::Config;
 
 #[derive(Deserialize)]
 pub struct Options {
-	pub capacity: Option<usize>,
 	pub strict: Option<bool>,
-	pub notifications: Option<bool>,
 	pub query_timeout: Option<u8>,
 	pub transaction_timeout: Option<u8>,
-	pub user: Option<User>,
-	pub tick_interval: Option<u8>,
 	pub capabilities: Option<CapabilitiesConfig>,
-}
-
-#[derive(Deserialize)]
-#[serde(untagged)]
-pub enum User {
-	Root {
-		username: String,
-		password: String,
-	},
-	/* Not supported yet
-	Namespace { namespace: String, username: String, password: String },
-	Database { namespace: String, database: String, username: String, password: String },
-	*/
 }
 
 #[derive(Deserialize)]
@@ -60,50 +40,6 @@ pub enum Targets {
 pub enum TargetsConfig {
 	Bool(bool),
 	Array(HashSet<String>),
-}
-
-impl TryFrom<Options> for Config {
-	type Error = Error;
-
-	fn try_from(opts: Options) -> Result<Self, Self::Error> {
-		let mut config = Self::new();
-
-		if let Some(strict) = opts.strict {
-			config = config.set_strict(strict);
-		}
-
-		if let Some(query_timeout) = opts.query_timeout {
-			config = config.query_timeout(Duration::from_secs(query_timeout as u64));
-		}
-
-		if let Some(transaction_timeout) = opts.transaction_timeout {
-			config = config.transaction_timeout(Duration::from_secs(transaction_timeout as u64));
-		}
-
-		if let Some(user) = opts.user {
-			match &user {
-				User::Root {
-					username,
-					password,
-				} => {
-					config = config.user(Root {
-						username,
-						password,
-					});
-				}
-			}
-		}
-
-		if let Some(tick_interval) = opts.tick_interval {
-			config = config.tick_interval(Duration::from_secs(tick_interval as u64));
-		}
-
-		if let Some(capabilities) = opts.capabilities {
-			config = config.capabilities(capabilities.try_into()?);
-		}
-
-		Ok(config)
-	}
 }
 
 macro_rules! process_targets {

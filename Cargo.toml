@@ -20,13 +20,8 @@ name = "surrealdb"
 crate-type = ["cdylib", "rlib"]
 
 [features]
-default = ["protocol-ws", "rustls"]
-protocol-ws = ["surrealdb/protocol-ws"]
-protocol-http = ["surrealdb/protocol-http"]
 kv-indxdb = ["surrealdb/kv-indxdb"]
 kv-mem = ["surrealdb/kv-mem"]
-http = ["surrealdb/http"]
-rustls = ["surrealdb/rustls"]
 stack-traces = ["dep:console_error_panic_hook"]
 
 [dependencies]
@@ -36,11 +31,12 @@ console_error_panic_hook = { version = "0.1.7", optional = true }
 dmp = "0.2.0"
 fern = "0.6.2"
 futures = "0.3.30"
+futures-util = "0.3.30"
 log = "0.4.21"
 serde = { version = "1.0.197", features = ["derive"] }
 serde-wasm-bindgen = "0.6.5"
 serde_json = "1.0.115"
-surrealdb = { version = "1.4.0", default-features = false, features = ["sql2"],git = "https://github.com/surrealdb/surrealdb", rev = "5ed7c52"}
+surrealdb = { version = "1.4.0", default-features = false, features = ["sql2"], git = "https://github.com/surrealdb/surrealdb", rev = "5ed7c52" }
 wasm-bindgen = "0.2.92"
 wasm-bindgen-futures = "0.4.42"
 wasm-streams = "0.4.0"
