@@ -1,6 +1,6 @@
 import { ConnectionOptions, SurrealWasmEngine as Swe } from "../dist/embedded";
 import { ConnectionStatus, ConnectionUnavailable, decodeCbor, Emitter, encodeCbor, Engine, Engines, EngineEvents, RpcRequest, RpcResponse, UnexpectedConnectionError, UnexpectedServerResponse } from "surrealdb.js";
-import z from 'zod';
+import { z } from 'zod';
 
 let id = 0;
 function getIncrementalID() {
@@ -20,13 +20,13 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions) {
 		} = {};
 
 		readonly emitter: Emitter<EngineEvents>;
-		private db?: Swe;
+		db?: Swe;
 
 		constructor(emitter: Emitter<EngineEvents>) {
 			this.emitter = emitter;
 		}
 
-		private setStatus<T extends ConnectionStatus>(
+		setStatus<T extends ConnectionStatus>(
 			status: T,
 			...args: EngineEvents[T]
 		) {

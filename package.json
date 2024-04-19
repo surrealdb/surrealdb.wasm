@@ -23,13 +23,14 @@
   },
   "scripts": {
     "serve": "esbuild --bundle --servedir=.",
-    "build": "pnpm compile && pnpm build-literal",
+    "build": "pnpm compile && pnpm build-literal && tsc",
     "compile": "wasm-pack build --release --target deno --out-name index --out-dir compiled/embedded --no-default-features --features kv-indxdb,kv-mem",
     "build-literal": "node build/index.js"
   },
   "devDependencies": {
     "esbuild": "^0.17.19",
-    "esbuild-plugin-copy-file": "^0.0.2"
+    "esbuild-plugin-copy-file": "^0.0.2",
+    "typescript": "^5.4.5"
   },
   "dependencies": {
     "surrealdb.js": "1.0.0-beta.3",
