@@ -72,7 +72,10 @@ impl SurrealWasmEngine {
 
 		let inner = SurrealWasmEngineInner {
 			kvs,
-			session: Default::default(),
+			session: Session {
+				// rt: true,
+				..Default::default()
+			},
 			vars: Default::default(),
 		};
 
@@ -87,6 +90,8 @@ struct SurrealWasmEngineInner {
 }
 
 impl RpcContext for SurrealWasmEngineInner {
+	// const LQ_SUPPORT: bool = true;
+
 	fn kvs(&self) -> &Datastore {
 		&self.kvs
 	}
@@ -112,4 +117,15 @@ impl RpcContext for SurrealWasmEngineInner {
 
 		val
 	}
+
+	// async fn handle_live(&self, lqid: &Uuid) {
+	// 	LIVE_QUERIES.write().await.insert(*lqid, self.id);
+	// 	trace!("Registered live query {} on websocket {}", lqid, self.id);
+	// }
+
+	// async fn handle_kill(&self, lqid: &Uuid) {
+	// 	if let Some(id) = LIVE_QUERIES.write().await.remove(lqid) {
+	// 		trace!("Unregistered live query {} on websocket {}", lqid, id);
+	// 	}
+	// }
 }
