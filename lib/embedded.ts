@@ -80,11 +80,10 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions) {
 			// So to be sure we simply subscribe before we send the message :)
 
 			const id = getIncrementalID();
-			console.log({ id, ...request });
-			const raw = await this.db.execute(new Uint8Array(encodeCbor({ id, ...request })));
-			console.log(raw)
-			const res = decodeCbor(raw.buffer);
-			console.log(res.buffer);
+			const res: RpcResponse = await this.db.execute(new Uint8Array(encodeCbor({ id, ...request })))
+				.then(raw => ({ result: decodeCbor(raw.buffer) }))
+				.catch(message => ({ error: { code: -1, message } }));
+
 			if ("result" in res) {
 				switch (request.method) {
 					case "use": {
