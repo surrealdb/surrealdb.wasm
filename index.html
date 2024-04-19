@@ -5,11 +5,20 @@
 		<title>Development server</title>
 	</head>
 	<body>
-		<p>Open a console to access the Surreal class!</p>
+		<p>
+			All exports from surrealdb.js and surrealdb.wasm are assigned to the window, and under "surreal",
+			a new Surreal instance was created with the wasm engine already installed. You can play around with it in the browser console!
+		</p>
 		<script type="module">
-			import Surreal from './lib/full.js';
+			import * as surreal from './node_modules/surrealdb.js/web/index.js';
+			import * as wasm from './dist/embedded/web.js';
 			if (typeof window !== 'undefined') {
-				window.Surreal = Surreal;
+				Object.assign(window, surreal);
+				Object.assign(window, wasm);
+
+				window.surreal = new Surreal({
+					engines: surrealdbWasmEngines()
+				});
 			}
 		</script>
 	</body>

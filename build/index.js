@@ -3,7 +3,7 @@ import copyFilePlugin from 'esbuild-plugin-copy-file';
 import fs from 'fs';
 
 const shimContent = new Buffer.from(await fs.readFileSync('./build/shim.js'));
-const targets = ['full', 'ws', 'http'];
+const targets = ['embedded'];
 
 await Promise.all(targets.map(build));
 

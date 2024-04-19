@@ -17,29 +17,29 @@
   ],
   "exports": {
     ".": {
-      "types": "./lib/full.d.ts",
-      "default": "./lib/full.js"
-    },
-    "./ws": {
-      "types": "./lib/ws.d.ts",
-      "default": "./lib/ws.js"
-    },
-    "./http": {
-      "types": "./lib/http.d.ts",
-      "default": "./lib/http.js"
+      "types": "./lib/embedded.d.ts",
+      "default": "./lib/embedded.js",
+      "bun": "./lib/embedded.js",
+      "browser": "./dist/embedded/web.js",
+      "deno": "./lib/embedded.js",
+      "import": "./lib/embedded.js",
+      "react-native": "./lib/embedded.js"
     }
   },
   "scripts": {
     "serve": "esbuild --bundle --servedir=.",
-    "build": "npm run compile && npm run build-literal",
-    "compile": "npm run compile:full && npm run compile:ws && npm run compile:http",
-    "compile:full": "wasm-pack build --release --target deno --out-name index --out-dir compiled/full --no-default-features --features protocol-ws,protocol-http,kv-indxdb,kv-mem,rustls",
-    "compile:ws": "wasm-pack build --release --target deno --out-name index --out-dir compiled/ws --no-default-features --features protocol-ws,rustls",
-    "compile:http": "wasm-pack build --release --target deno --out-name index --out-dir compiled/http --no-default-features --features protocol-http,rustls",
-    "build-literal": "node build/index.js"
+    "build": "pnpm compile && pnpm build-literal && tsc && pnpm build-web",
+    "compile": "wasm-pack build --release --target deno --out-name index --out-dir compiled/embedded --no-default-features --features kv-indxdb,kv-mem",
+    "build-literal": "node build/index.js",
+    "build-web": "node build/web.js"
   },
   "devDependencies": {
     "esbuild": "^0.17.19",
-    "esbuild-plugin-copy-file": "^0.0.2"
+    "esbuild-plugin-copy-file": "^0.0.2",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "surrealdb.js": "1.0.0-beta.3",
+    "zod": "^3.22.5"
   }
 }
