@@ -64,10 +64,11 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions) {
 		async disconnect(): Promise<void> {
 			this.connection = {};
 			await this.ready;
-			if (!this.db) throw new ConnectionUnavailable();
+			this.db.free();
 			delete this.db;
 			await this.reader;
 			delete this.reader;
+			this.setStatus(ConnectionStatus.Disconnected);
 		}
 
 		async rpc<
