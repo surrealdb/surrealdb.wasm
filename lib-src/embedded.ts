@@ -1,5 +1,5 @@
 import { ConnectionOptions, SurrealWasmEngine as Swe } from "../dist/embedded";
-import { ConnectionStatus, ConnectionUnavailable, decodeCbor, Emitter, encodeCbor, Engine, Engines, EngineEvents, RpcRequest, RpcResponse, UnexpectedConnectionError, UnexpectedServerResponse } from "surrealdb.js";
+import { ConnectionStatus, ConnectionUnavailable, decodeCbor, Emitter, encodeCbor, Engine, EngineEvents, RpcRequest, RpcResponse, UnexpectedConnectionError, UnexpectedServerResponse } from "surrealdb.js";
 import { z } from 'zod';
 
 let id = 0;
