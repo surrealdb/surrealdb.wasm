@@ -9,7 +9,7 @@ function getIncrementalID() {
 
 export function surrealdbWasmEngines(opts?: ConnectionOptions) {
 	class WasmEmbeddedEngine implements Engine {
-		ready?: Promise<void>;
+		ready: Promise<void> | undefined = undefined;
 		reader?: Promise<void>;
 		status: ConnectionStatus = ConnectionStatus.Disconnected;
 		connection: {
@@ -37,38 +37,46 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions) {
 		async connect(url: URL) {
 			this.connection.url = url;
 			this.setStatus(ConnectionStatus.Connecting);
-			const db = await Swe.connect(url.toString(), opts).catch(e => {
-				console.log(e);
-				const error = new UnexpectedConnectionError(
-					typeof e == 'string' ? e : "error" in e ? e.error : "An unexpected error occurred",
-				);
-				this.setStatus(ConnectionStatus.Error, error);
-				throw e;
-			});
+			const ready = (async (resolve, reject) => {
+				const db = await Swe.connect(url.toString(), opts).catch(e => {
+					console.log(e);
+					const error = new UnexpectedConnectionError(
+						typeof e == 'string' ? e : "error" in e ? e.error : "An unexpected error occurred",
+					);
+					this.setStatus(ConnectionStatus.Error, error);
+					throw e;
+				});
 
-			this.reader = (async () => {
-				const reader = db.notifications().getReader();
-				while (this.connected) {
-					const { done, value } = await reader.read();
-					if (done) break;
-					const raw = value as Uint8Array;
-					const { id, action, result } = decodeCbor(raw.buffer);
-					if (id) this.emitter.emit(`live-${id.toString()}`, [action, result], true);
-				}
+				this.reader = (async () => {
+					const reader = db.notifications().getReader();
+					while (this.connected) {
+						const { done, value } = await reader.read();
+						if (done) break;
+						const raw = value as Uint8Array;
+						const { id, action, result } = decodeCbor(raw.buffer);
+						if (id) this.emitter.emit(`live-${id.toString()}`, [action, result], true);
+					}
+				})();
+
+				this.db = db;
+				this.setStatus(ConnectionStatus.Connected)
 			})();
 
-			this.db = db;
-			this.setStatus(ConnectionStatus.Connected)
+			this.ready = ready;
+			return await ready;
 		}
 
 		async disconnect(): Promise<void> {
 			this.connection = {};
 			await this.ready;
+			this.ready = undefined;
 			this.db?.free();
 			delete this.db;
 			await this.reader;
 			delete this.reader;
-			this.setStatus(ConnectionStatus.Disconnected);
+			if (this.status !== ConnectionStatus.Disconnected) {
+				this.setStatus(ConnectionStatus.Disconnected);
+			}
 		}
 
 		async rpc<
