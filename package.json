@@ -33,7 +33,10 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "surrealdb.js": "1.0.0-beta.4",
+    "surrealdb.js": "^1.0.0-beta.5",
     "zod": "^3.22.5"
+  },
+  "peerDependencies": {
+    "surrealdb.js": "^1.0.0-beta.5"
   }
 }
