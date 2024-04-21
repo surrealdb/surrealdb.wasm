@@ -1,0 +1,10 @@
+    case 'https:':
+    case 'http:':
+    wasmCode = await (await fetch(wasm_url)).arrayBuffer();
+    break
+===========
+	case "tauri:":
+    case 'https:':
+    case 'http:':
+    wasmCode = await (await fetch(wasm_url)).arrayBuffer();
+    break
