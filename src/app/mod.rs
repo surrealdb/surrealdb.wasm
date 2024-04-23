@@ -1,26 +1,27 @@
 use std::collections::BTreeMap;
 use std::time::Duration;
 
-mod types;
 mod opt;
+mod types;
 
-use opt::to_value::to_value;
-use serde_json::json;
+use cbor::Cbor;
+use futures::StreamExt;
+use opt::endpoint::Options;
 use serde_wasm_bindgen::from_value;
 use surrealdb::dbs::Session;
 use surrealdb::kvs::Datastore;
 use surrealdb::rpc::format::cbor;
 use surrealdb::rpc::method::Method;
 use surrealdb::rpc::{Data, RpcContext};
-use surrealdb::sql::Value;
+use surrealdb::sql::{Object, Value};
+use surrealdb::dbs::Notification;
+use types::TsConnectionOptions;
+use uuid::Uuid;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 use wasm_streams::readable::sys;
 use wasm_streams::ReadableStream;
 use web_sys::js_sys::Uint8Array;
-use types::TsConnectionOptions;
-use opt::endpoint::Options;
-use futures::StreamExt;
 
 pub use crate::err::Error;
 
@@ -44,36 +45,51 @@ impl SurrealWasmEngine {
 	pub fn notifications(&self) -> Result<sys::ReadableStream, Error> {
 		let stream = self.0.kvs.notifications().ok_or("Notifications not enabled")?;
 
-		let response = stream.map(|notification| {
-			let json = json!({
-				"id": notification.id,
-				"action": notification.action.to_string(),
-				"result": notification.result.into_json(),
-			});
-			to_value(&json).map_err(Into::into)
-		});
+		fn process_notification(notification: Notification) -> Result<JsValue, JsValue> {
+			// Construct live message
+			let mut message = Object::default();
+			message.insert("id".to_string(), notification.id.into());
+			message.insert("action".to_string(), notification.action.to_string().into());
+			message.insert("result".to_string(), notification.result);
+
+			// Into CBOR value
+			let cbor: Cbor = Value::Object(message).try_into().map_err(|_| JsValue::from_str("Failed to convert notification to CBOR"))?;
+			let mut res = Vec::new();
+			ciborium::into_writer(&cbor.0, &mut res).unwrap();
+			let out_arr: Uint8Array = res.as_slice().into();
+			Ok(out_arr.into())
+		}
+
+		let response = stream.map(process_notification);
 		Ok(ReadableStream::from_stream(response).into_raw())
 	}
 
-	pub async fn connect(endpoint: String, opts: Option<TsConnectionOptions>) -> Result<SurrealWasmEngine, Error> {
+	pub async fn connect(
+		endpoint: String,
+		opts: Option<TsConnectionOptions>,
+	) -> Result<SurrealWasmEngine, Error> {
 		let endpoint = match &endpoint {
 			s if s.starts_with("mem:") => "memory",
-			s => s
+			s => s,
 		};
 		let kvs = Datastore::new(endpoint).await?.with_notifications();
 		let kvs = match from_value::<Option<Options>>(JsValue::from(opts))? {
 			None => kvs,
 			Some(opts) => kvs
-				.with_capabilities(opts.capabilities.map_or(Ok(Default::default()), |a| a.try_into())?)
-				.with_transaction_timeout(opts.transaction_timeout.map(|qt| Duration::from_secs(qt as u64)))
+				.with_capabilities(
+					opts.capabilities.map_or(Ok(Default::default()), |a| a.try_into())?,
+				)
+				.with_transaction_timeout(
+					opts.transaction_timeout.map(|qt| Duration::from_secs(qt as u64)),
+				)
 				.with_query_timeout(opts.query_timeout.map(|qt| Duration::from_secs(qt as u64)))
-				.with_strict_mode(opts.strict.map_or(Default::default(), |s| s))
+				.with_strict_mode(opts.strict.map_or(Default::default(), |s| s)),
 		};
 
 		let inner = SurrealWasmEngineInner {
 			kvs,
 			session: Session {
-				// rt: true,
+				rt: true,
 				..Default::default()
 			},
 			vars: Default::default(),
@@ -90,8 +106,6 @@ struct SurrealWasmEngineInner {
 }
 
 impl RpcContext for SurrealWasmEngineInner {
-	// const LQ_SUPPORT: bool = true;
-
 	fn kvs(&self) -> &Datastore {
 		&self.kvs
 	}
@@ -118,14 +132,11 @@ impl RpcContext for SurrealWasmEngineInner {
 		val
 	}
 
-	// async fn handle_live(&self, lqid: &Uuid) {
-	// 	LIVE_QUERIES.write().await.insert(*lqid, self.id);
-	// 	trace!("Registered live query {} on websocket {}", lqid, self.id);
-	// }
-
-	// async fn handle_kill(&self, lqid: &Uuid) {
-	// 	if let Some(id) = LIVE_QUERIES.write().await.remove(lqid) {
-	// 		trace!("Unregistered live query {} on websocket {}", lqid, id);
-	// 	}
-	// }
+	const LQ_SUPPORT: bool = true;
+	fn handle_live(&self, _lqid: &Uuid) -> impl std::future::Future<Output = ()> + Send {
+		async { () }
+	}
+	fn handle_kill(&self, _lqid: &Uuid) -> impl std::future::Future<Output = ()> + Send {
+		async { () }
+	}
 }

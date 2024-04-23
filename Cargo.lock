@@ -2654,6 +2654,7 @@ dependencies = [
  "serde-wasm-bindgen",
  "serde_json",
  "surrealdb 1.4.2",
+ "uuid",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-bindgen-test",
