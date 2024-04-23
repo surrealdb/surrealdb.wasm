@@ -4,17 +4,17 @@ use std::time::Duration;
 mod opt;
 mod types;
 
+use cbor::Cbor;
 use futures::StreamExt;
 use opt::endpoint::Options;
-use opt::to_value::to_value;
-use serde_json::json;
 use serde_wasm_bindgen::from_value;
 use surrealdb::dbs::Session;
 use surrealdb::kvs::Datastore;
 use surrealdb::rpc::format::cbor;
 use surrealdb::rpc::method::Method;
 use surrealdb::rpc::{Data, RpcContext};
-use surrealdb::sql::Value;
+use surrealdb::sql::{Object, Value};
+use surrealdb::dbs::Notification;
 use types::TsConnectionOptions;
 use uuid::Uuid;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -45,16 +45,22 @@ impl SurrealWasmEngine {
 	pub fn notifications(&self) -> Result<sys::ReadableStream, Error> {
 		let stream = self.0.kvs.notifications().ok_or("Notifications not enabled")?;
 
-		for _ in 0..100 {}
+		fn process_notification(notification: Notification) -> Result<JsValue, JsValue> {
+			// Construct live message
+			let mut message = Object::default();
+			message.insert("id".to_string(), notification.id.into());
+			message.insert("action".to_string(), notification.action.to_string().into());
+			message.insert("result".to_string(), notification.result);
 
-		let response = stream.map(|notification| {
-			let json = json!({
-				"id": notification.id,
-				"action": notification.action.to_string(),
-				"result": notification.result.into_json(),
-			});
-			to_value(&json).map_err(Into::into)
-		});
+			// Into CBOR value
+			let cbor: Cbor = Value::Object(message).try_into().map_err(|_| JsValue::from_str("Failed to convert notification to CBOR"))?;
+			let mut res = Vec::new();
+			ciborium::into_writer(&cbor.0, &mut res).unwrap();
+			let out_arr: Uint8Array = res.as_slice().into();
+			Ok(out_arr.into())
+		}
+
+		let response = stream.map(process_notification);
 		Ok(ReadableStream::from_stream(response).into_raw())
 	}
 

@@ -47,6 +47,9 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions) {
 					throw e;
 				});
 
+				this.db = db;
+				this.setStatus(ConnectionStatus.Connected);
+
 				this.reader = (async () => {
 					const reader = db.notifications().getReader();
 					while (this.connected) {
@@ -57,9 +60,6 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions) {
 						if (id) this.emitter.emit(`live-${id.toString()}`, [action, result], true);
 					}
 				})();
-
-				this.db = db;
-				this.setStatus(ConnectionStatus.Connected)
 			})();
 
 			this.ready = ready;
