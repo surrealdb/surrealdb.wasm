@@ -32,11 +32,9 @@
 
 A WebAssembly engine for the SurrealDB JavaScript SDK.
 
-- [x] A plugin for the SurrealDB JavaScript SDK, which can be used to run SurrealDB as an embedded database within a browser environment.
-- [x] Enables SurrealDB to be run in-memory, or to persist data by running on top of IndexedDB.
-- [x] It enables a consistent JavaScript and TypeScript API from the `surrealdb.js` library, with support for any protocol (`http:`, `https:`, `ws:`, `wss:`) or storage engine (`memory`, `indxdb:`).
-- [x] It's a library targeted to browsers, not server side environments.
-- [x] It works with ES modules (`import` statements), not CommonJS (`require` function).
+This library is a plugin for the SurrealDB JavaScript SDK, which can be used to run SurrealDB as an embedded database within a browser environment, not server side environments. It enables SurrealDB to be run in-memory, or to persist data by running on top of IndexedDB. It allows for a consistent JavaScript and TypeScript API when using the `surrealdb.js` library by adding support for embedded storage engines (`memory`, `indxdb`) alongside the remote connection protocols (`http`, `https`, `ws`, `wss`). 
+
+> This library works with ES modules (`import`), not CommonJS (`require`).
 
 ## Example usage
 
