@@ -1,101 +1,58 @@
+<br>
+
+<p align="center">
+    <img width=120 src="https://raw.githubusercontent.com/surrealdb/icons/main/surreal.svg" />
+    &nbsp;
+    <img width=120 src="https://raw.githubusercontent.com/surrealdb/icons/main/webassembly.svg" />
+</p>
+
+<h3 align="center">A WebAssembly engine for the SurrealDB JavaScript SDK.</h3>
+
+<br>
+
+<p align="center">
+    <a href="https://github.com/surrealdb/surrealdb.wasm"><img src="https://img.shields.io/badge/status-beta-ff00bb.svg?style=flat-square"></a>
+    &nbsp;
+    <a href="https://surrealdb.com/docs/integration/libraries/javascript"><img src="https://img.shields.io/badge/docs-view-44cc11.svg?style=flat-square"></a>
+    &nbsp;
+    <a href="https://github.com/surrealdb/surrealdb.wasm"><img src="https://img.shields.io/npm/v/surrealdb.wasm?style=flat-square"></a>
+</p>
+
+<p align="center">
+    <a href="https://surrealdb.com/discord"><img src="https://img.shields.io/discord/902568124350599239?label=discord&style=flat-square&color=5a66f6"></a>
+    &nbsp;
+    <a href="https://twitter.com/surrealdb"><img src="https://img.shields.io/badge/twitter-follow_us-1d9bf0.svg?style=flat-square"></a>
+    &nbsp;
+    <a href="https://www.linkedin.com/company/surrealdb/"><img src="https://img.shields.io/badge/linkedin-connect_with_us-0a66c2.svg?style=flat-square"></a>
+    &nbsp;
+    <a href="https://www.youtube.com/channel/UCjf2teVEuYVvvVC-gFZNq6w"><img src="https://img.shields.io/badge/youtube-subscribe-fc1c1c.svg?style=flat-square"></a>
+</p>
+
 # surrealdb.wasm
 
-The official SurrealDB library for WebAssembly.
+A WebAssembly engine for the SurrealDB JavaScript SDK.
 
-[![](https://img.shields.io/badge/status-beta-ff00bb.svg?style=flat-square)](https://github.com/surrealdb/surrealdb.wasm)
-[![](https://img.shields.io/badge/docs-view-44cc11.svg?style=flat-square)](https://surrealdb.com/docs/integration/libraries/webassembly)
-[![](https://img.shields.io/badge/license-Apache_License_2.0-00bfff.svg?style=flat-square)](https://github.com/surrealdb/surrealdb.wasm)
-[![](https://img.shields.io/npm/v/surrealdb.wasm?style=flat-square)](https://www.npmjs.com/package/surrealdb.wasm)
+- [x] A plugin for the SurrealDB JavaScript SDK, which can be used to run SurrealDB as an embedded database within a browser environment.
+- [x] Enables SurrealDB to be run in-memory, or to persist data by running on top of IndexedDB.
+- [x] It enables a consistent JavaScript and TypeScript API from the `surrealdb.js` library, with support for any protocol (`http:`, `https:`, `ws:`, `wss:`) or storage engine (`memory`, `indxdb:`).
+- [x] It's a library targeted to browsers, not server side environments.
+- [x] It works with ES modules (`import` statements), not CommonJS (`require` function).
 
-
-<h2><img height="20" src="https://github.com/surrealdb/surrealdb/raw/main/img/whatissurreal.svg?raw=true">&nbsp;&nbsp;What is SurrealDB?</h2>
-
-SurrealDB is an end-to-end cloud-native database designed for modern applications, including web, mobile, serverless, Jamstack, backend, and traditional applications. With SurrealDB, you can simplify your database and API infrastructure, reduce development time, and build secure, performant apps quickly and cost-effectively.
-
-**Key features of SurrealDB include:**
-
-- **Reduces development time**: SurrealDB simplifies your database and API stack by removing the need for most server-side components, allowing you to build secure, performant apps faster and cheaper.
-- **Real-time collaborative API backend service:** SurrealDB functions as both a database and an API backend service, enabling real-time collaboration.
-- **Support for multiple querying languages:** SurrealDB supports SQL querying from client devices, GraphQL, ACID transactions, WebSocket connections, structured and unstructured data, graph querying, full-text indexing, and geospatial querying.
-- **Granular access control**: SurrealDB provides row-level permissions-based access control, giving you the ability to manage data access with precision.
-
-
-View the [features](https://surrealdb.com/features), the latest [releases](https://surrealdb.com/releases), and [documentation](https://surrealdb.com/docs).
-
-<h2><img height="20" src="https://github.com/surrealdb/surrealdb/blob/main/img/features.svg?raw=true">&nbsp;&nbsp;Features</h2>
-
-- [x] Can be used as an embedded database
-- [x] Consistent API across all supported protocols and storage engines
-- [x] Interfaces with the JavaScript SDK to have a common interface between all connections
-- [x] Asynchronous, lock-free connections
-
-<h2><img height="20" src="https://github.com/surrealdb/surrealdb/blob/main/img/gettingstarted.svg?raw=true">&nbsp;&nbsp;Getting started</h2>
-
-It is important to know what the `surrealdb.wasm` library is, and what it is not:
-- It's a library targeted to browsers, not NodeJS.
-- It is targeted towards ES modules (`import` statements), not CommonJS (`require` function).
-
-## Importing the module
-Here is an example on how to import this package, and how to connect it to the JavaScript SDK
+## Example usage
 
 ```js
 import { Surreal } from 'surrealdb.js';
 import { surrealdbWasmEngines } from 'surrealdb.wasm';
 
+// Enable the WebAssembly engines
 const db = new Surreal({
 	engines: surrealdbWasmEngines(),
 });
 
-// Can now use the JS SDK as you normally would, 
-// but with added mem and indxdb protocols
-```
-
-<h2><img height="20" src="https://github.com/surrealdb/surrealdb/blob/main/img/features.svg?raw=true">&nbsp;&nbsp;Quick look</h2>
-
-This library enables simple and advanced querying of an embedded or remote database. By default, all remote connections to SurrealDB are made over WebSockets, and automatically reconnect when the connection is terminated.
-
-```js
-import { Surreal } from 'surrealdb.js';
-import { surrealdbWasmEngines } from 'surrealdb.wasm';
-
-const db = new Surreal({
-	engines: surrealdbWasmEngines(),
-});
-
-// Connect to an in-memory database
+// Now we can start SurrealDB as an in-memory database
 await db.connect("mem://");
-// Connect to an indexeddb database
+// Or we can start a persisted IndexedDB database
 await db.connect("indxdb://demo");
 
-// Select a specific namespace / database
-await db.use({ 
-	namespace: "test", 
-	database: "test" 
-});
-
-// Create a new person with a random id
-let created = await db.create("person", {
-	title: "Founder & CEO",
-	name: {
-		first: "Tobie",
-		last: "Morgan Hitchcock",
-	},
-	marketing: true,
-});
-
-// Update a person record with a specific id
-let updated = await db.merge(new RecordId('person', 'jaime'), {
-	marketing: true,
-});
-
-// Select all people records
-let people = await db.select("person");
-
-// Perform a custom advanced query
-let groups = await db.query(
-	"SELECT marketing, count() FROM $tb GROUP BY marketing",
-	{
-		tb: new Table("person"),
-	},
-);
+// Now use the JavaScript SDK as normal.
 ```
