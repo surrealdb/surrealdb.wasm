@@ -46,7 +46,7 @@ import { surrealdbWasmEngines } from 'surrealdb.wasm';
 
 // Enable the WebAssembly engines
 const db = new Surreal({
-	engines: surrealdbWasmEngines(),
+    engines: surrealdbWasmEngines(),
 });
 
 // Now we can start SurrealDB as an in-memory database
