@@ -30,7 +30,7 @@
 
 # surrealdb.wasm
 
-A WebAssembly engine for the SurrealDB JavaScript SDK.
+A WebAssembly engine for the SurrealDB [JavaScript SDK](https://github.com/surrealdb/surrealdb.js).
 
 This library is a plugin for the SurrealDB JavaScript SDK, which can be used to run SurrealDB as an embedded database within a browser environment, not server side environments.
 
