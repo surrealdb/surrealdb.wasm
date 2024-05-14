@@ -8,13 +8,13 @@ use cbor::Cbor;
 use futures::StreamExt;
 use opt::endpoint::Options;
 use serde_wasm_bindgen::from_value;
+use surrealdb::dbs::Notification;
 use surrealdb::dbs::Session;
 use surrealdb::kvs::Datastore;
 use surrealdb::rpc::format::cbor;
 use surrealdb::rpc::method::Method;
 use surrealdb::rpc::{Data, RpcContext};
 use surrealdb::sql::{Object, Value};
-use surrealdb::dbs::Notification;
 use types::TsConnectionOptions;
 use uuid::Uuid;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -53,7 +53,9 @@ impl SurrealWasmEngine {
 			message.insert("result".to_string(), notification.result);
 
 			// Into CBOR value
-			let cbor: Cbor = Value::Object(message).try_into().map_err(|_| JsValue::from_str("Failed to convert notification to CBOR"))?;
+			let cbor: Cbor = Value::Object(message)
+				.try_into()
+				.map_err(|_| JsValue::from_str("Failed to convert notification to CBOR"))?;
 			let mut res = Vec::new();
 			ciborium::into_writer(&cbor.0, &mut res).unwrap();
 			let out_arr: Uint8Array = res.as_slice().into();
