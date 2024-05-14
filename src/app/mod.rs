@@ -88,10 +88,7 @@ impl SurrealWasmEngine {
 
 		let inner = SurrealWasmEngineInner {
 			kvs,
-			session: Session {
-				rt: true,
-				..Default::default()
-			},
+			session: Session::default().with_rt(true),
 			vars: Default::default(),
 		};
 
