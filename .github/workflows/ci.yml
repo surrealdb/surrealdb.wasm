@@ -1,10 +1,10 @@
-name: Publish Package to npmjs
-on:
-  push:
-    tags:
-      - '*'
+name: CI
+
+on: push
+
 jobs:
   build:
+    name: Attempt Build
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout"
@@ -29,7 +29,3 @@ jobs:
         run: npm install
       - name: "Build & Bundle"
         run: npm run build
-      - name: "Publish!"
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

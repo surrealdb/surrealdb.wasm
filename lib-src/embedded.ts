@@ -26,6 +26,10 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions) {
 			this.emitter = emitter;
 		}
 
+		async version(): Promise<string> {
+			return Swe.version();
+		}
+
 		setStatus<T extends ConnectionStatus>(
 			status: T,
 			...args: EngineEvents[T]
