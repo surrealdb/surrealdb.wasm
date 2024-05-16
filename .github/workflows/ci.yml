@@ -1,0 +1,31 @@
+name: CI
+
+on: push
+
+jobs:
+  build:
+    name: Attempt Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+      - name: "Install Node & NPM"
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+          registry-url: 'https://registry.npmjs.org'
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 8
+      - name: "Install wasm-pack"
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Install jq
+        uses: dcarbone/install-jq-action@v2.1.0
+
+      - name: "Install NPM dependencies"
+        run: npm install
+      - name: "Build & Bundle"
+        run: npm run build
