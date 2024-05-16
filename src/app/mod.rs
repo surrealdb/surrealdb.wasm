@@ -25,6 +25,8 @@ use web_sys::js_sys::Uint8Array;
 
 pub use crate::err::Error;
 
+const SURREALDB_VERSION: &str = include_str!("../surrealdb-version");
+
 #[wasm_bindgen]
 pub struct SurrealWasmEngine(SurrealWasmEngineInner);
 
@@ -96,6 +98,10 @@ impl SurrealWasmEngine {
 
 		Ok(SurrealWasmEngine(inner))
 	}
+
+	pub fn version() -> Result<String, Error> {
+		Ok(SURREALDB_VERSION.into())
+	}
 }
 
 struct SurrealWasmEngineInner {
@@ -126,9 +132,7 @@ impl RpcContext for SurrealWasmEngineInner {
 	}
 
 	fn version_data(&self) -> impl Into<Data> {
-		let val = "todo".to_string();
-
-		val
+		Value::Strand(format!("surrealdb-{SURREALDB_VERSION}").into())
 	}
 
 	const LQ_SUPPORT: bool = true;
