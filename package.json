@@ -1,43 +1,43 @@
 {
-  "name": "surrealdb.wasm",
-  "version": "1.0.0-beta.12",
-  "description": "WebAssembly driver for SurrealDB",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/surrealdb/surrealdb.wasm.git"
-  },
-  "author": {
-    "name": "Tobie Morgan Hitchcock",
-    "url": "https://surrealdb.com"
-  },
-  "type": "module",
-  "files": [
-    "dist/",
-    "lib/"
-  ],
-  "exports": {
-    ".": {
-      "types": "./lib/embedded.d.ts",
-      "default": "./lib/embedded.js"
+    "name": "surrealdb.wasm",
+    "version": "1.0.0-beta.11",
+    "description": "WebAssembly driver for SurrealDB",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/surrealdb/surrealdb.wasm.git"
+    },
+    "author": {
+        "name": "Tobie Morgan Hitchcock",
+        "url": "https://surrealdb.com"
+    },
+    "type": "module",
+    "files": [
+        "dist/"
+    ],
+    "browser": "./dist/embedded/esm.bundled.js",
+    "exports": {
+        ".": {
+            "types": "./dist/embedded/types.d.ts",
+            "default": "./dist/embedded/esm.js"
+        }
+    },
+    "scripts": {
+        "serve": "esbuild --bundle --servedir=.",
+        "build": "pnpm extract-surrealdb-version && pnpm compile && pnpm build-literal",
+        "compile": "wasm-pack build --release --target deno --out-name index --out-dir compiled/embedded --no-default-features --features kv-indxdb,kv-mem",
+        "build-literal": "node build/index.js",
+        "extract-surrealdb-version": "bash ./extract-surrealdb-version.bash"
+    },
+    "devDependencies": {
+        "dts-bundle-generator": "^9.5.1",
+        "esbuild": "^0.17.19",
+        "esbuild-plugin-copy-file": "^0.0.2",
+        "typescript": "^5.4.5"
+    },
+    "dependencies": {
+        "surrealdb.js": "^1.0.0-beta.11"
+    },
+    "peerDependencies": {
+        "surrealdb.js": "^1.0.0-beta.11"
     }
-  },
-  "scripts": {
-    "serve": "esbuild --bundle --servedir=.",
-    "build": "pnpm extract-surrealdb-version && pnpm compile && pnpm build-literal && tsc",
-    "compile": "wasm-pack build --release --target deno --out-name index --out-dir compiled/embedded --no-default-features --features kv-indxdb,kv-mem",
-    "build-literal": "node build/index.js",
-    "extract-surrealdb-version": "bash ./extract-surrealdb-version.bash"
-  },
-  "devDependencies": {
-    "esbuild": "^0.17.19",
-    "esbuild-plugin-copy-file": "^0.0.2",
-    "typescript": "^5.4.5"
-  },
-  "dependencies": {
-    "surrealdb.js": "^1.0.0-beta.7",
-    "zod": "^3.22.5"
-  },
-  "peerDependencies": {
-    "surrealdb.js": "^1.0.0-beta.7"
-  }
 }

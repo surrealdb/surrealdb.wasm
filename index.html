@@ -1,25 +1,27 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-	<head>
-		<meta charset="UTF-8">
-		<title>Development server</title>
-	</head>
-	<body>
-		<p>
-			All exports from surrealdb.js and surrealdb.wasm are assigned to the window, and under "surreal",
-			a new Surreal instance was created with the wasm engine already installed. You can play around with it in the browser console!
-		</p>
-		<script type="module">
-			import * as surreal from './node_modules/surrealdb.js/web/index.js';
-			import * as wasm from './dist/embedded/web.js';
-			if (typeof window !== 'undefined') {
-				Object.assign(window, surreal);
-				Object.assign(window, wasm);
+    <head>
+        <meta charset="UTF-8" />
+        <title>Development server</title>
+    </head>
+    <body>
+        <p>
+            All exports from surrealdb.js and surrealdb.wasm are assigned to the
+            window, and under "surreal", a new Surreal instance was created with
+            the wasm engine already installed. You can play around with it in
+            the browser console!
+        </p>
+        <script type="module">
+            import * as surrealdb from "./node_modules/surrealdb.js/dist/esm.bundled.js";
+            import * as wasm from "./dist/embedded/esm.bundled.js";
+            if (typeof window !== "undefined") {
+                Object.assign(window, surrealdb);
+                Object.assign(window, wasm);
 
-				window.surreal = new Surreal({
-					engines: surrealdbWasmEngines()
-				});
-			}
-		</script>
-	</body>
+                window.surreal = new Surreal({
+                    engines: wasm.surrealdbWasmEngines(),
+                });
+            }
+        </script>
+    </body>
 </html>
