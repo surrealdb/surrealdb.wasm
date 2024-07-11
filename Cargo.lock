@@ -2765,32 +2765,6 @@ checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
 
 [[package]]
 name = "surrealdb"
-version = "0.0.0"
-dependencies = [
- "cargo-lock",
- "chrono",
- "ciborium",
- "console_error_panic_hook",
- "dmp",
- "fern",
- "futures",
- "futures-util",
- "log",
- "once_cell",
- "serde",
- "serde-wasm-bindgen",
- "serde_json",
- "surrealdb 1.5.2",
- "uuid",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "wasm-bindgen-test",
- "wasm-streams",
- "web-sys",
-]
-
-[[package]]
-name = "surrealdb"
 version = "1.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "31ccf39357a204b7db24f7e6951607fad95bc9e41384543d0ca914936af48c2a"
@@ -3002,6 +2976,32 @@ dependencies = [
  "serde_json",
  "sha2",
  "simple_asn1",
+]
+
+[[package]]
+name = "surrealdb-wasm"
+version = "0.0.0"
+dependencies = [
+ "cargo-lock",
+ "chrono",
+ "ciborium",
+ "console_error_panic_hook",
+ "dmp",
+ "fern",
+ "futures",
+ "futures-util",
+ "log",
+ "once_cell",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "surrealdb",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-bindgen-test",
+ "wasm-streams",
+ "web-sys",
 ]
 
 [[package]]
