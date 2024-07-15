@@ -56,3 +56,21 @@ await db.connect("indxdb://demo");
 
 // Now use the JavaScript SDK as normal.
 ```
+
+## Usage with Vite
+
+When using [Vite](https://vitejs.dev/) the following configuration is recommended to be placed in your `vite.config.ts`
+
+```js
+optimizeDeps: {
+    exclude: ['surrealdb.wasm', 'surrealql.wasm'],
+    esbuildOptions: {
+        target: 'esnext',
+    },
+},
+esbuild: {
+    supported: {
+        'top-level-await': true
+    },
+}
+```
