@@ -15,6 +15,7 @@ async function build(target) {
 
 async function applyPatches(target) {
     let content = fs.readFileSync(`compiled/${target}/index.js`).toString();
+    fs.writeFileSync(`compiled/${target}/unpatched.js`, content);
     content = shimContent + content;
 
     const tauriPatch = fs
@@ -23,7 +24,7 @@ async function applyPatches(target) {
         .split("===========\n");
     content = content.replace(tauriPatch[0], tauriPatch[1]);
 
-    fs.writeFileSync(`compiled/${target}/patched.js`, content);
+    fs.writeFileSync(`compiled/${target}/index.js`, content);
 }
 
 async function bundle(target) {
