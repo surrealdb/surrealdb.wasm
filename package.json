@@ -1,6 +1,6 @@
 {
-    "name": "surrealdb.wasm",
-    "version": "1.0.0-beta.15",
+    "name": "@surrealdb/wasm",
+    "version": "1.0.0-beta.16",
     "description": "WebAssembly driver for SurrealDB",
     "repository": {
         "type": "git",
@@ -34,9 +34,9 @@
         "typescript": "^5.4.5"
     },
     "dependencies": {
-        "surrealdb.js": "^1.0.0-beta.11"
+        "surrealdb": "^1.0.0-beta.20"
     },
     "peerDependencies": {
-        "surrealdb.js": "^1.0.0-beta.11"
+        "surrealdb": "^1.0.0-beta.20"
     }
 }

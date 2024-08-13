@@ -36,7 +36,7 @@ async function bundle(target) {
         format: "esm",
         platform: "node",
         outfile: `dist/${target}/esm.js`,
-        external: ["surrealdb.js"],
+        external: ["surrealdb"],
         plugins: [
             copyFilePlugin({
                 after: Object.fromEntries(
