@@ -28,21 +28,21 @@
     <a href="https://www.youtube.com/channel/UCjf2teVEuYVvvVC-gFZNq6w"><img src="https://img.shields.io/badge/youtube-subscribe-fc1c1c.svg?style=flat-square"></a>
 </p>
 
-# surrealdb.wasm
+# @surrealdb/wasm
 
 A WebAssembly engine for the SurrealDB [JavaScript SDK](https://github.com/surrealdb/surrealdb.js).
 
 This library is a plugin for the SurrealDB JavaScript SDK, which can be used to run SurrealDB as an embedded database within a browser environment, not server side environments.
 
-It enables SurrealDB to be run in-memory, or to persist data by running on top of IndexedDB. It allows for a consistent JavaScript and TypeScript API when using the `surrealdb.js` library by adding support for embedded storage engines (`memory`, `indxdb`) alongside the remote connection protocols (`http`, `https`, `ws`, `wss`). 
+It enables SurrealDB to be run in-memory, or to persist data by running on top of IndexedDB. It allows for a consistent JavaScript and TypeScript API when using the `surrealdb.js` library by adding support for embedded storage engines (`memory`, `indxdb`) alongside the remote connection protocols (`http`, `https`, `ws`, `wss`).
 
 This library works with ES modules (`import`), not CommonJS (`require`).
 
 ## Example usage
 
 ```js
-import { Surreal } from 'surrealdb.js';
-import { surrealdbWasmEngines } from 'surrealdb.wasm';
+import { Surreal } from 'surrealdb';
+import { surrealdbWasmEngines } from '@surrealdb/wasm';
 
 // Enable the WebAssembly engines
 const db = new Surreal({
@@ -63,7 +63,7 @@ When using [Vite](https://vitejs.dev/) the following configuration is recommende
 
 ```js
 optimizeDeps: {
-    exclude: ['surrealdb.wasm', 'surrealql.wasm'],
+    exclude: ['@surrealdb/wasm', 'surrealql.wasm'],
     esbuildOptions: {
         target: 'esnext',
     },

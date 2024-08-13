@@ -12,7 +12,7 @@ import {
     type RpcRequest,
     type RpcResponse,
     UnexpectedConnectionError,
-} from "surrealdb.js";
+} from "surrealdb";
 
 export function surrealdbWasmEngines(opts?: ConnectionOptions) {
     class WasmEmbeddedEngine extends AbstractEngine {
