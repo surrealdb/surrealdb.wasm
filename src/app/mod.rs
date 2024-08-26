@@ -4,18 +4,32 @@ use std::time::Duration;
 mod opt;
 mod types;
 
-use cbor::Cbor;
 use futures::StreamExt;
 use once_cell::sync::Lazy;
 use opt::endpoint::Options;
 use serde_wasm_bindgen::from_value;
-use surrealdb::dbs::Notification;
-use surrealdb::dbs::Session;
-use surrealdb::kvs::Datastore;
-use surrealdb::rpc::format::cbor;
-use surrealdb::rpc::method::Method;
-use surrealdb::rpc::{Data, RpcContext};
-use surrealdb::sql::{Object, Value};
+#[cfg(not(feature = "surrealdb2"))]
+use surrealdb::{
+	dbs::{Notification, Session},
+	kvs::Datastore,
+	rpc::{
+		format::cbor::{self, Cbor},
+		method::Method,
+		Data, RpcContext,
+	},
+	sql::{Object, Value},
+};
+#[cfg(feature = "surrealdb2")]
+use surrealdb2::{
+	dbs::{Notification, Session},
+	kvs::Datastore,
+	rpc::{
+		format::cbor::{self, Cbor},
+		method::Method,
+		Data, RpcContext,
+	},
+	sql::{Object, Value},
+};
 use types::TsConnectionOptions;
 use uuid::Uuid;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -130,8 +144,14 @@ impl RpcContext for SurrealWasmEngineInner {
 		&mut self.vars
 	}
 
+	#[cfg(not(feature = "surrealdb2"))]
 	fn version_data(&self) -> impl Into<Data> {
 		Value::Strand(format!("surrealdb-{}", *SURREALDB_VERSION).into())
+	}
+
+	#[cfg(feature = "surrealdb2")]
+	fn version_data(&self) -> Data {
+		Value::Strand(format!("surrealdb-{}", *SURREALDB_VERSION).into()).into()
 	}
 
 	const LQ_SUPPORT: bool = true;
