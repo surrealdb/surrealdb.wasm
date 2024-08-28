@@ -1,38 +1,67 @@
 name: Publish Package to npmjs
+
 on:
-    push:
-        tags:
-            - "*"
+  push:
+    tags:
+      - "*"
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        steps:
-            - name: "Checkout"
-              uses: actions/checkout@v3
-            - name: "Install Node & NPM"
-              uses: actions/setup-node@v3
-              with:
-                  node-version: "18.x"
-                  registry-url: "https://registry.npmjs.org"
-            - uses: pnpm/action-setup@v2
-              name: Install pnpm
-              id: pnpm-install
-              with:
-                  version: 8
-            - uses: actions-rust-lang/setup-rust-toolchain@v1
-              with:
-                  toolchain: 1.79.0
-            - name: "Install wasm-pack"
-              run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+  build:
+    name: Publish
+    runs-on: ubuntu-latest
 
-            - name: Install jq
-              uses: dcarbone/install-jq-action@v2.1.0
+    steps:
+    - uses: actions/checkout@v3
 
-            - name: "Install NPM dependencies"
-              run: npm install
-            - name: "Build & Bundle"
-              run: npm run build
-            - name: "Publish!"
-              run: npm publish --access public
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    - name: Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
+        registry-url: "https://registry.npmjs.org"
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+          version: 9
+    
+    - name: Install Rust toolchain
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+          toolchain: 1.79.0
+
+    - name: Install wasm-pack
+      run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+    - name: Extract versions
+      run: |
+        echo "GIT_TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
+        echo "PKG_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+    - name: Assert package versions
+      run: |
+        echo "CM_VERSION=$CM_VERSION"
+        echo "PKG_VERSION=$PKG_VERSION"
+
+        if [[ "v$PKG_VERSION" != "$GIT_TAG" ]]; then
+          echo "Version mismatch! Please correct package versions"
+          exit 1
+        else
+          echo "Version check complete"
+        fi
+
+    - name: Install NPM dependencies
+      run: pnpm install
+      
+    - name: Build & Bundle
+      run: pnpm build
+
+    - name: Publish (latest)
+      if: github.ref == 'refs/heads/main'
+      run: npm publish --access public --dry-run
+      env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    
+    - name: Publish (next)
+      if: github.ref != 'refs/heads/main'
+      run: npm publish --access public --tag next --dry-run
+      env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
