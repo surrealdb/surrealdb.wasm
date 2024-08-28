@@ -63,7 +63,7 @@ When using [Vite](https://vitejs.dev/) the following configuration is recommende
 
 ```js
 optimizeDeps: {
-    exclude: ['@surrealdb/wasm', 'surrealql.wasm'],
+    exclude: ['@surrealdb/wasm'],
     esbuildOptions: {
         target: 'esnext',
     },
