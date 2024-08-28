@@ -14,11 +14,11 @@
     "files": [
         "dist/"
     ],
-    "browser": "./dist/embedded/index.bundled.js",
+    "browser": "./dist/surreal/index.bundled.js",
     "exports": {
         ".": {
-            "types": "./dist/embedded/types.d.ts",
-            "default": "./dist/embedded/index.js"
+            "types": "./dist/surreal/types.d.ts",
+            "default": "./dist/surreal/index.js"
         }
     },
     "scripts": {
