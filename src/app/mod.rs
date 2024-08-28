@@ -6,7 +6,6 @@ mod types;
 
 use cbor::Cbor;
 use futures::StreamExt;
-use once_cell::sync::Lazy;
 use opt::endpoint::Options;
 use serde_wasm_bindgen::from_value;
 use surrealdb::dbs::Notification;
@@ -99,7 +98,7 @@ impl SurrealWasmEngine {
 	}
 
 	pub fn version() -> Result<String, Error> {
-		Ok(SURREALDB_VERSION.clone())
+		Ok(env!("SURREALDB_VERSION").into())
 	}
 }
 
@@ -131,7 +130,7 @@ impl RpcContext for SurrealWasmEngineInner {
 	}
 
 	fn version_data(&self) -> Data {
-		Value::Strand(format!("surrealdb-{}", *SURREALDB_VERSION).into()).into()
+		Value::Strand(format!("surrealdb-{}", env!("SURREALDB_VERSION")).into()).into()
 	}
 
 	const LQ_SUPPORT: bool = true;
@@ -142,16 +141,3 @@ impl RpcContext for SurrealWasmEngineInner {
 		async { () }
 	}
 }
-
-static LOCK_FILE: &str = include_str!("../../Cargo.lock");
-
-pub static SURREALDB_VERSION: Lazy<String> = Lazy::new(|| {
-	let lock: cargo_lock::Lockfile = LOCK_FILE.parse().expect("Failed to parse Cargo.lock");
-	let package = lock
-		.packages
-		.iter()
-		.find(|p| p.name.as_str() == "surrealdb")
-		.expect("Failed to find surrealdb in Cargo.lock");
-
-	format!("{}.{}.{}", package.version.major, package.version.minor, package.version.patch)
-});

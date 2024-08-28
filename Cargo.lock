@@ -3301,7 +3301,6 @@ dependencies = [
  "futures",
  "futures-util",
  "log",
- "once_cell",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
