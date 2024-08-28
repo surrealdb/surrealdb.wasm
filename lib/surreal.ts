@@ -1,20 +1,22 @@
 import {
     type ConnectionOptions,
     SurrealWasmEngine as Swe,
-} from "../compiled/embedded";
+} from "../compiled/surreal";
+
 import {
     getIncrementalID,
     ConnectionStatus,
     ConnectionUnavailable,
-    type Emitter,
     AbstractEngine,
+    UnexpectedConnectionError,
+    type Emitter,
     type EngineEvents,
     type RpcRequest,
     type RpcResponse,
-    UnexpectedConnectionError,
 } from "surrealdb";
 
 export function surrealdbWasmEngines(opts?: ConnectionOptions) {
+
     class WasmEmbeddedEngine extends AbstractEngine {
         ready: Promise<void> | undefined = undefined;
         reader?: Promise<void>;
@@ -36,7 +38,8 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions) {
         async connect(url: URL) {
             this.connection.url = url;
             this.setStatus(ConnectionStatus.Connecting);
-            const ready = (async (resolve, reject) => {
+			
+            const ready = (async () => {
                 const db = await Swe.connect(url.toString(), opts).catch(
                     (e) => {
                         console.log(e);
@@ -92,6 +95,7 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions) {
             this.db = undefined;
             await this.reader;
             this.reader = undefined;
+			
             if (this.status !== ConnectionStatus.Disconnected) {
                 this.setStatus(ConnectionStatus.Disconnected);
             }

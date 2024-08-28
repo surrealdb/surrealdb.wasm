@@ -130,8 +130,8 @@ impl RpcContext for SurrealWasmEngineInner {
 		&mut self.vars
 	}
 
-	fn version_data(&self) -> impl Into<Data> {
-		Value::Strand(format!("surrealdb-{}", *SURREALDB_VERSION).into())
+	fn version_data(&self) -> Data {
+		Value::Strand(format!("surrealdb-{}", *SURREALDB_VERSION).into()).into()
 	}
 
 	const LQ_SUPPORT: bool = true;

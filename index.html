@@ -12,8 +12,9 @@
             around with it in the browser console!
         </p>
         <script type="module">
-            import * as surrealdb from "./node_modules/surrealdb/dist/esm.bundled.js";
-            import * as wasm from "./dist/embedded/esm.bundled.js";
+            import * as surrealdb from "./node_modules/surrealdb/dist/index.bundled.mjs";
+            import * as wasm from "./dist/surreal/index.bundled.js";
+			
             if (typeof window !== "undefined") {
                 Object.assign(window, surrealdb);
                 Object.assign(window, wasm);
