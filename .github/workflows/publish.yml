@@ -56,12 +56,12 @@ jobs:
 
     - name: Publish (latest)
       if: github.ref == 'refs/heads/main'
-      run: npm publish --access public --dry-run
+      run: npm publish --access public
       env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     
     - name: Publish (next)
       if: github.ref != 'refs/heads/main'
-      run: npm publish --access public --tag next --dry-run
+      run: npm publish --access public --tag next
       env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
