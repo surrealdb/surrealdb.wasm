@@ -135,12 +135,10 @@ impl RpcContext for SurrealWasmEngineInner {
 	}
 
 	const LQ_SUPPORT: bool = true;
-	fn handle_live(&self, _lqid: &Uuid) -> impl std::future::Future<Output = ()> + Send {
-		async { () }
-	}
-	fn handle_kill(&self, _lqid: &Uuid) -> impl std::future::Future<Output = ()> + Send {
-		async { () }
-	}
+
+	async fn handle_live(&self, _lqid: &Uuid) {}
+
+	async fn handle_kill(&self, _lqid: &Uuid) {}
 }
 
 static LOCK_FILE: &str = include_str!("../../Cargo.lock");
