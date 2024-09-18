@@ -21,6 +21,8 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions) {
         ready: Promise<void> | undefined = undefined;
         reader?: Promise<void>;
         status: ConnectionStatus = ConnectionStatus.Disconnected;
+		queue: (() => Promise<unknown>)[] = [];
+		processing = false;
         db?: Swe;
 
         async version(): Promise<string> {
@@ -109,7 +111,53 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions) {
             await this.ready;
             if (!this.db) throw new ConnectionUnavailable();
 
-            // It's not realistic for the message to ever arrive before the listener is registered on the emitter
+			return new Promise((resolve, reject) => {
+				this.queue.push(async () => {
+					try {
+						const result = await this.execute(request);
+
+						resolve(result as RpcResponse<Result>);
+					} catch (error) {
+						reject(error);
+					}
+				});
+	
+				this.processQueue();
+			});
+        }
+
+        get connected() {
+            return !!this.db;
+        }
+
+		async processQueue() {
+			if (this.processing) {
+				return;
+			}
+	
+			this.processing = true;
+	
+			while (this.queue.length > 0) {
+				const task = this.queue.shift();
+
+				if (task) {
+					try {
+						await task();
+					} catch (error) {
+						console.error('Query execution failed', error);
+					}
+				}
+			}
+	
+			this.processing = false;
+		}
+
+		async execute<
+			Method extends string,
+			Params extends unknown[] | undefined,
+			Result,
+		>(request: RpcRequest<Method, Params>): Promise<RpcResponse<Result>> {
+			// It's not realistic for the message to ever arrive before the listener is registered on the emitter
             // And we don't want to collect the response messages in the emitter
             // So to be sure we simply subscribe before we send the message :)
 
@@ -148,11 +196,7 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions) {
             }
 
             return res as RpcResponse<Result>;
-        }
-
-        get connected() {
-            return !!this.db;
-        }
+		}
     }
 
     return {
