@@ -25,7 +25,7 @@ kv-mem = ["surrealdb/kv-mem"]
 stack-traces = ["dep:console_error_panic_hook"]
 
 [dependencies]
-surrealdb = { version = "2.0.1", default-features = false, features = [ "http" ] }
+surrealdb = { version = "2.0.2", default-features = false, features = [ "http" ] }
 chrono = { version = "0.4.37", features = ["serde", "wasmbind"] }
 ciborium = "0.2.2"
 console_error_panic_hook = { version = "0.1.7", optional = true }
