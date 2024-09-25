@@ -9,13 +9,13 @@ import {
     ConnectionUnavailable,
     AbstractEngine,
     UnexpectedConnectionError,
-    type Emitter,
     type EngineEvents,
     type RpcRequest,
     type RpcResponse,
+	Engine,
 } from "surrealdb";
 
-export function surrealdbWasmEngines(opts?: ConnectionOptions) {
+export function surrealdbWasmEngines(opts?: ConnectionOptions): Record<string, Engine> {
 
     class WasmEmbeddedEngine extends AbstractEngine {
         ready: Promise<void> | undefined = undefined;
