@@ -12,10 +12,10 @@ import {
     type EngineEvents,
     type RpcRequest,
     type RpcResponse,
-	Engine,
+	Engines,
 } from "surrealdb";
 
-export function surrealdbWasmEngines(opts?: ConnectionOptions): Record<string, Engine> {
+export function surrealdbWasmEngines(opts?: ConnectionOptions): Engines {
 
     class WasmEmbeddedEngine extends AbstractEngine {
         ready: Promise<void> | undefined = undefined;
