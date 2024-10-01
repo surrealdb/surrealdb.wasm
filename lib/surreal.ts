@@ -15,6 +15,13 @@ import {
 	Engines,
 } from "surrealdb";
 
+/**
+ * Construct the engines for the SurrealDB WASM implementation. This
+ * includes support for `mem` and `indxdb` protocols.
+ * 
+ * @param opts Configuration options
+ * @returns The engines
+ */
 export function surrealdbWasmEngines(opts?: ConnectionOptions): Engines {
 
     class WasmEmbeddedEngine extends AbstractEngine {
