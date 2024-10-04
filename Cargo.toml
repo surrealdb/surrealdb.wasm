@@ -25,6 +25,7 @@ kv-mem = ["surrealdb/kv-mem"]
 stack-traces = ["dep:console_error_panic_hook"]
 
 [dependencies]
+surrealdb = { version = "2.0.3", default-features = false, features = ["http"] }
 chrono = { version = "0.4.37", features = ["serde", "wasmbind"] }
 ciborium = "0.2.2"
 console_error_panic_hook = { version = "0.1.7", optional = true }
@@ -36,17 +37,15 @@ log = "0.4.21"
 serde = { version = "1.0.197", features = ["derive"] }
 serde-wasm-bindgen = "0.6.5"
 serde_json = "1.0.115"
-surrealdb = { version = "1.5.4", default-features = false, features = [
-    "sql2",
-    "http",
-] }
 uuid = "1.8.0"
 wasm-bindgen = "0.2.92"
 wasm-bindgen-futures = "0.4.42"
 wasm-streams = "0.4.0"
 web-sys = { version = "0.3.69", features = ["console"] }
-once_cell = "1.19.0"
 cargo-lock = "9.0.0"
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.41"
+
+[build-dependencies]
+cargo-lock = "9.0.0"

@@ -1,10 +1,10 @@
 import * as esbuild from "esbuild";
 import copyFilePlugin from "esbuild-plugin-copy-file";
-import fs from "node:fs";
 import { spawn } from "node:child_process";
+import fs from "node:fs";
 
 const shimContent = new Buffer.from(fs.readFileSync("./build/shim.js"));
-const targets = ["embedded"];
+const targets = ["surreal"];
 
 await Promise.all(targets.map(build));
 
@@ -15,13 +15,13 @@ async function build(target) {
 
 async function applyPatches(target) {
     let content = fs.readFileSync(`compiled/${target}/index.js`).toString();
-    fs.writeFileSync(`compiled/${target}/unpatched.js`, content);
     content = shimContent + content;
 
     const tauriPatch = fs
         .readFileSync("build/tauri.patch")
         .toString()
         .split("===========\n");
+	
     content = content.replace(tauriPatch[0], tauriPatch[1]);
 
     fs.writeFileSync(`compiled/${target}/index.js`, content);
@@ -35,7 +35,7 @@ async function bundle(target) {
         minifySyntax: true,
         format: "esm",
         platform: "node",
-        outfile: `dist/${target}/esm.js`,
+        outfile: `dist/${target}/index.js`,
         external: ["surrealdb"],
         plugins: [
             copyFilePlugin({
@@ -58,7 +58,7 @@ async function bundle(target) {
         minifySyntax: true,
         format: "esm",
         platform: "node",
-        outfile: `dist/${target}/esm.bundled.js`,
+        outfile: `dist/${target}/index.bundled.js`,
         plugins: [
             copyFilePlugin({
                 after: Object.fromEntries(

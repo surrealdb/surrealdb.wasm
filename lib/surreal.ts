@@ -1,24 +1,35 @@
 import {
     type ConnectionOptions,
     SurrealWasmEngine as Swe,
-} from "../compiled/embedded";
+} from "../compiled/surreal";
+
 import {
     getIncrementalID,
     ConnectionStatus,
     ConnectionUnavailable,
-    type Emitter,
     AbstractEngine,
+    UnexpectedConnectionError,
     type EngineEvents,
     type RpcRequest,
     type RpcResponse,
-    UnexpectedConnectionError,
+	Engines,
 } from "surrealdb";
 
-export function surrealdbWasmEngines(opts?: ConnectionOptions) {
+/**
+ * Construct the engines for the SurrealDB WASM implementation. This
+ * includes support for `mem` and `indxdb` protocols.
+ * 
+ * @param opts Configuration options
+ * @returns The engines
+ */
+export function surrealdbWasmEngines(opts?: ConnectionOptions): Engines {
+
     class WasmEmbeddedEngine extends AbstractEngine {
         ready: Promise<void> | undefined = undefined;
         reader?: Promise<void>;
         status: ConnectionStatus = ConnectionStatus.Disconnected;
+		queue: (() => Promise<unknown>)[] = [];
+		processing = false;
         db?: Swe;
 
         async version(): Promise<string> {
@@ -36,7 +47,8 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions) {
         async connect(url: URL) {
             this.connection.url = url;
             this.setStatus(ConnectionStatus.Connecting);
-            const ready = (async (resolve, reject) => {
+			
+            const ready = (async () => {
                 const db = await Swe.connect(url.toString(), opts).catch(
                     (e) => {
                         console.log(e);
@@ -92,6 +104,7 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions) {
             this.db = undefined;
             await this.reader;
             this.reader = undefined;
+			
             if (this.status !== ConnectionStatus.Disconnected) {
                 this.setStatus(ConnectionStatus.Disconnected);
             }
@@ -105,7 +118,53 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions) {
             await this.ready;
             if (!this.db) throw new ConnectionUnavailable();
 
-            // It's not realistic for the message to ever arrive before the listener is registered on the emitter
+			return new Promise((resolve, reject) => {
+				this.queue.push(async () => {
+					try {
+						const result = await this.execute(request);
+
+						resolve(result as RpcResponse<Result>);
+					} catch (error) {
+						reject(error);
+					}
+				});
+	
+				this.processQueue();
+			});
+        }
+
+        get connected() {
+            return !!this.db;
+        }
+
+		async processQueue() {
+			if (this.processing) {
+				return;
+			}
+	
+			this.processing = true;
+	
+			while (this.queue.length > 0) {
+				const task = this.queue.shift();
+
+				if (task) {
+					try {
+						await task();
+					} catch (error) {
+						console.error('Query execution failed', error);
+					}
+				}
+			}
+	
+			this.processing = false;
+		}
+
+		async execute<
+			Method extends string,
+			Params extends unknown[] | undefined,
+			Result,
+		>(request: RpcRequest<Method, Params>): Promise<RpcResponse<Result>> {
+			// It's not realistic for the message to ever arrive before the listener is registered on the emitter
             // And we don't want to collect the response messages in the emitter
             // So to be sure we simply subscribe before we send the message :)
 
@@ -144,11 +203,7 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions) {
             }
 
             return res as RpcResponse<Result>;
-        }
-
-        get connected() {
-            return !!this.db;
-        }
+		}
     }
 
     return {

@@ -12,7 +12,9 @@ const ITEXT_STYLE: &'static str = r#"
 		query_timeout?: number;
 		transaction_timeout?: number;
 		capabilities?: boolean | {
+			scripting?: boolean;
 			guest_access?: boolean;
+			live_query_notifications?: boolean;
 			functions?: boolean | string[] | CapabilitiesAllowDenyList;
 			network_targets?: boolean | string[] | CapabilitiesAllowDenyList;
 		}

@@ -1,7 +1,7 @@
 use crate::err::Error;
 use serde::Deserialize;
 use std::collections::HashSet;
-use surrealdb::opt::capabilities;
+use surrealdb::dbs::capabilities;
 
 #[derive(Deserialize)]
 pub struct Options {
@@ -46,7 +46,7 @@ macro_rules! process_targets {
 	($set:ident) => {{
 		let mut functions = HashSet::with_capacity($set.len());
 		for function in $set {
-			functions.insert(function.parse()?);
+			functions.insert(function.parse().expect("invalid function name"));
 		}
 		capabilities::Targets::Some(functions)
 	}};
