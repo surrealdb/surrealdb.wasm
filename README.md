@@ -13,7 +13,7 @@
 <p align="center">
     <a href="https://github.com/surrealdb/surrealdb.wasm"><img src="https://img.shields.io/badge/status-stable-ff00bb.svg?style=flat-square"></a>
     &nbsp;
-    <a href="https://surrealdb.com/docs/sdk/javascript"><img src="https://img.shields.io/badge/docs-view-44cc11.svg?style=flat-square"></a>
+    <a href="https://surrealdb.com/docs/sdk/javascript/engines/wasm"><img src="https://img.shields.io/badge/docs-view-44cc11.svg?style=flat-square"></a>
     &nbsp;
     <a href="https://www.npmjs.com/package/@surrealdb/wasm"><img src="https://img.shields.io/npm/v/@surrealdb/wasm?style=flat-square"></a>
     &nbsp;
