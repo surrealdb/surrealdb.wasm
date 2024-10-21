@@ -11,11 +11,13 @@
 <br>
 
 <p align="center">
-    <a href="https://github.com/surrealdb/surrealdb.wasm"><img src="https://img.shields.io/badge/status-beta-ff00bb.svg?style=flat-square"></a>
+    <a href="https://github.com/surrealdb/surrealdb.wasm"><img src="https://img.shields.io/badge/status-stable-ff00bb.svg?style=flat-square"></a>
     &nbsp;
-    <a href="https://surrealdb.com/docs/integration/libraries/javascript"><img src="https://img.shields.io/badge/docs-view-44cc11.svg?style=flat-square"></a>
+    <a href="https://surrealdb.com/docs/sdk/javascript/engines/wasm"><img src="https://img.shields.io/badge/docs-view-44cc11.svg?style=flat-square"></a>
     &nbsp;
-    <a href="https://github.com/surrealdb/surrealdb.wasm"><img src="https://img.shields.io/npm/v/surrealdb.wasm?style=flat-square"></a>
+    <a href="https://www.npmjs.com/package/@surrealdb/wasm"><img src="https://img.shields.io/npm/v/@surrealdb/wasm?style=flat-square"></a>
+    &nbsp;
+    <a href="https://www.npmjs.com/package/@surrealdb/wasm"><img src="https://img.shields.io/npm/dm/@surrealdb/wasm?style=flat-square"></a>
 </p>
 
 <p align="center">
@@ -25,7 +27,7 @@
     &nbsp;
     <a href="https://www.linkedin.com/company/surrealdb/"><img src="https://img.shields.io/badge/linkedin-connect_with_us-0a66c2.svg?style=flat-square"></a>
     &nbsp;
-    <a href="https://www.youtube.com/channel/UCjf2teVEuYVvvVC-gFZNq6w"><img src="https://img.shields.io/badge/youtube-subscribe-fc1c1c.svg?style=flat-square"></a>
+    <a href="https://www.youtube.com/@SurrealDB"><img src="https://img.shields.io/badge/youtube-subscribe-fc1c1c.svg?style=flat-square"></a>
 </p>
 
 # @surrealdb/wasm
@@ -41,8 +43,8 @@ This library works with ES modules (`import`), not CommonJS (`require`).
 ## Example usage
 
 ```js
-import { Surreal } from 'surrealdb';
-import { surrealdbWasmEngines } from '@surrealdb/wasm';
+import { Surreal } from "surrealdb";
+import { surrealdbWasmEngines } from "@surrealdb/wasm";
 
 // Enable the WebAssembly engines
 const db = new Surreal({
@@ -63,14 +65,14 @@ When using [Vite](https://vitejs.dev/) the following configuration is recommende
 
 ```js
 optimizeDeps: {
-    exclude: ['@surrealdb/wasm'],
+    exclude: ["@surrealdb/wasm"],
     esbuildOptions: {
-        target: 'esnext',
+        target: "esnext",
     },
 },
 esbuild: {
     supported: {
-        'top-level-await': true
+        "top-level-await": true
     },
 }
 ```
