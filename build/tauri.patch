@@ -2,9 +2,9 @@
     case 'http:':
     wasmCode = await (await fetch(wasm_url)).arrayBuffer();
     break
+    default:
+    throw new Error(`Unsupported protocol: ${wasm_url.protocol}`);
 ===========
-	case "tauri:":
-    case 'https:':
-    case 'http:':
+    default:
     wasmCode = await (await fetch(wasm_url)).arrayBuffer();
     break
