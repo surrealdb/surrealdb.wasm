@@ -25,6 +25,8 @@
         "serve": "esbuild --bundle --servedir=.",
         "build": "pnpm compile && pnpm build-literal",
         "compile": "wasm-pack build --release --target deno --out-name index --out-dir compiled/surreal --no-default-features --features kv-indxdb,kv-mem",
+        "build:debug": "pnpm compile:debug && pnpm build-literal",
+        "compile:debug": "wasm-pack build --dev --target deno --out-name index --out-dir compiled/surreal --no-default-features --features kv-indxdb,kv-mem",
         "build-literal": "node build/index.js"
     },
     "devDependencies": {
