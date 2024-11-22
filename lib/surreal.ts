@@ -13,6 +13,7 @@ import {
     type RpcRequest,
     type RpcResponse,
 	Engines,
+	ExportOptions,
 } from "surrealdb";
 
 /**
@@ -25,6 +26,7 @@ import {
 export function surrealdbWasmEngines(opts?: ConnectionOptions): Engines {
 
     class WasmEmbeddedEngine extends AbstractEngine {
+		
         ready: Promise<void> | undefined = undefined;
         reader?: Promise<void>;
         status: ConnectionStatus = ConnectionStatus.Disconnected;
@@ -204,6 +206,11 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions): Engines {
 
             return res as RpcResponse<Result>;
 		}
+
+		export(options?: Partial<ExportOptions>): Promise<string> {
+			return this.db.export(options ? new Uint8Array(this.encodeCbor(options)) : undefined);
+		}
+
     }
 
     return {

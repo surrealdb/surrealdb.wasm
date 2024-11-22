@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       surrealdb:
-        specifier: ^1.0.4
-        version: 1.0.4(tslib@2.6.3)(typescript@5.4.5)(ws@8.16.0(bufferutil@4.0.8)(utf-8-validate@6.0.3))
+        specifier: ^1.1.0
+        version: 1.1.0(tslib@2.6.3)(typescript@5.4.5)(ws@8.16.0(bufferutil@4.0.8)(utf-8-validate@6.0.3))
     devDependencies:
       dts-bundle-generator:
         specifier: ^9.5.1
@@ -210,8 +210,8 @@ packages:
     resolution: {integrity: sha512-zymm5+u+sCsSWyD9qNaejV3DFvhCKclKdizYaJUuHA83RLjb7nSuGnddCHGv0hk+KY7BMAlsWeK4Ueg6EV6XQg==}
     engines: {node: '>=8'}
 
-  isows@1.0.4:
-    resolution: {integrity: sha512-hEzjY+x9u9hPmBom9IIAqdJCwNLax+xrPb51vEPpERoFlIxgmZcHzsT5jKG06nvInKOBGvReAVz80Umed5CczQ==}
+  isows@1.0.6:
+    resolution: {integrity: sha512-lPHCayd40oW98/I0uvgaHKWCSvkzY27LjWLbtzOm64yQ+G3Q5npjjbdppU65iZXkK1Zt+kH9pfegli0AYfwYYw==}
     peerDependencies:
       ws: '*'
 
@@ -231,8 +231,8 @@ packages:
     resolution: {integrity: sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==}
     engines: {node: '>=8'}
 
-  surrealdb@1.0.4:
-    resolution: {integrity: sha512-08RotfawXLqNlfCar4eQdNNAAJol+REOYpsmS2Vv28u7FjvGzCSb7WOoZ8e+chwV1/leNIm3iVQee2HCMCLgqg==}
+  surrealdb@1.1.0:
+    resolution: {integrity: sha512-EAopFKeIo1lVCR+XEE/oMuh8LCPAIa2xC9MyVs5nw+BJyHc0Fr6F/UWVF9399LRtTBCoqe5G1W0hgxqLqkWaYA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       tslib: ^2.6.3
@@ -413,7 +413,7 @@ snapshots:
 
   is-fullwidth-code-point@3.0.0: {}
 
-  isows@1.0.4(ws@8.16.0(bufferutil@4.0.8)(utf-8-validate@6.0.3)):
+  isows@1.0.6(ws@8.16.0(bufferutil@4.0.8)(utf-8-validate@6.0.3)):
     dependencies:
       ws: 8.16.0(bufferutil@4.0.8)(utf-8-validate@6.0.3)
 
@@ -432,9 +432,9 @@ snapshots:
     dependencies:
       ansi-regex: 5.0.1
 
-  surrealdb@1.0.4(tslib@2.6.3)(typescript@5.4.5)(ws@8.16.0(bufferutil@4.0.8)(utf-8-validate@6.0.3)):
+  surrealdb@1.1.0(tslib@2.6.3)(typescript@5.4.5)(ws@8.16.0(bufferutil@4.0.8)(utf-8-validate@6.0.3)):
     dependencies:
-      isows: 1.0.4(ws@8.16.0(bufferutil@4.0.8)(utf-8-validate@6.0.3))
+      isows: 1.0.6(ws@8.16.0(bufferutil@4.0.8)(utf-8-validate@6.0.3))
       tslib: 2.6.3
       typescript: 5.4.5
       uuidv7: 1.0.1

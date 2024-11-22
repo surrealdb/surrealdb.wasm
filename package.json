@@ -36,6 +36,6 @@
         "typescript": "^5.4.5"
     },
     "peerDependencies": {
-        "surrealdb": "^1.0.4"
+        "surrealdb": "^1.1.0"
     }
 }
