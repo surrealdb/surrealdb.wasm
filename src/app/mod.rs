@@ -99,7 +99,7 @@ impl SurrealWasmEngine {
 	}
 
 	pub async fn export(&self, config: Option<Uint8Array>) -> Result<String, Error> {
-		let (tx, rx) = channel::bounded(1);
+		let (tx, rx) = channel::unbounded();
 
 		match config {
 			Some(config) => {
