@@ -11,6 +11,7 @@ use serde_wasm_bindgen::from_value;
 use surrealdb::dbs::Notification;
 use surrealdb::dbs::Session;
 use surrealdb::kvs::Datastore;
+use surrealdb::kvs::export::Config;
 use surrealdb::rpc::format::cbor;
 use surrealdb::rpc::method::Method;
 use surrealdb::rpc::{Data, RpcContext};
@@ -95,6 +96,31 @@ impl SurrealWasmEngine {
 		};
 
 		Ok(SurrealWasmEngine(inner))
+	}
+
+	pub async fn export(&self, config: Option<Uint8Array>) -> Result<String, Error> {
+		let (tx, rx) = channel::unbounded();
+
+		match config {
+			Some(config) => {
+				let in_config = cbor::parse_value(config.to_vec()).map_err(|e| e.to_string())?;
+				let config = Config::try_from(&in_config).map_err(|e| e.to_string())?;
+
+				self.0.kvs.export_with_config(&self.0.session, tx, config).await?.await?;
+			}
+			None => {
+				self.0.kvs.export(&self.0.session, tx).await?.await?;
+			}
+		};
+
+		let mut buffer = Vec::new();
+		while let Ok(item) = rx.try_recv() {
+			buffer.push(item);
+		}
+
+		let result = String::from_utf8(buffer.concat().into()).map_err(|e| e.to_string())?;
+
+		Ok(result)
 	}
 
 	pub fn version() -> Result<String, Error> {
