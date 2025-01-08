@@ -1,7 +1,7 @@
 name: Create test build
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       branch:
         description: 'Which branch to build'
