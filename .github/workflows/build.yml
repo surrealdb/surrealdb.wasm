@@ -15,7 +15,8 @@ jobs:
 
         steps:
             - uses: actions/checkout@v3
-              ref: "${{ inputs.branch }}"
+              with:
+                ref: "${{ inputs.branch }}"
 
             - name: Install Node.js
               uses: actions/setup-node@v3
