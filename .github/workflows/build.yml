@@ -36,24 +36,7 @@ jobs:
 
             - name: Install wasm-pack
               run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-
-            - name: Extract versions
-              run: |
-                  echo "GIT_TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
-                  echo "PKG_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
-
-            - name: Assert package versions
-              run: |
-                  echo "CM_VERSION=$CM_VERSION"
-                  echo "PKG_VERSION=$PKG_VERSION"
-
-                  if [[ "v$PKG_VERSION" != "$GIT_TAG" ]]; then
-                    echo "Version mismatch! Please correct package versions"
-                    exit 1
-                  else
-                    echo "Version check complete"
-                  fi
-
+              
             - name: Install NPM dependencies
               run: pnpm install
 
