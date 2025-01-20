@@ -44,4 +44,4 @@ channel = { version = "2.3.1", package = "async-channel" }
 wasm-bindgen-test = "0.3.41"
 
 [build-dependencies]
-cargo-lock = "9.0.0"
+cargo-lock = "10.1.0"
