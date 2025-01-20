@@ -35,7 +35,7 @@ impl SurrealWasmEngine {
 		let in_data = cbor::req(data.to_vec()).map_err(|e| e.to_string())?;
 		let res = self
 			.0
-			.execute(Method::parse(in_data.method), in_data.params)
+			.execute_mutable(Method::parse(in_data.method), in_data.params)
 			.await
 			.map_err(|e| e.to_string())?;
 		println!("{:?}", res);
