@@ -139,20 +139,16 @@ impl RpcContext for SurrealWasmEngineInner {
 		&self.kvs
 	}
 
+	fn lock(&self) -> Arc<Semaphore> {
+		self.lock.clone()
+	}
+
 	fn session(&self) -> &Session {
 		&self.session
 	}
-
-	fn session_mut(&mut self) -> &mut Session {
-		&mut self.session
-	}
-
-	fn vars(&self) -> &BTreeMap<String, Value> {
-		&self.vars
-	}
-
-	fn vars_mut(&mut self) -> &mut BTreeMap<String, Value> {
-		&mut self.vars
+	
+	fn set_session(&self, session: Arc<Session>) {
+		self.session.store(session);
 	}
 
 	fn version_data(&self) -> Data {
