@@ -21,6 +21,7 @@ pub enum CapabilitiesConfig {
 		live_query_notifications: Option<bool>,
 		functions: Option<Targets>,
 		network_targets: Option<Targets>,
+		experimental: Option<Targets>,
 	},
 }
 
@@ -67,6 +68,7 @@ impl TryFrom<CapabilitiesConfig> for capabilities::Capabilities {
 				live_query_notifications,
 				functions,
 				network_targets,
+				experimental,
 			} => {
 				let mut capabilities = Self::default();
 
@@ -198,6 +200,68 @@ impl TryFrom<CapabilitiesConfig> for capabilities::Capabilities {
 									TargetsConfig::Array(set) => {
 										capabilities = capabilities
 											.without_network_targets(process_targets!(set));
+									}
+								}
+							}
+						}
+					}
+				}
+
+				if let Some(experimental) = experimental {
+					match experimental {
+						Targets::Bool(experimental) => match experimental {
+							true => {
+								capabilities =
+									capabilities.with_experimental(capabilities::Targets::All);
+							}
+							false => {
+								capabilities =
+									capabilities.with_experimental(capabilities::Targets::None);
+							}
+						},
+						Targets::Array(set) => {
+							capabilities = capabilities.with_experimental(process_targets!(set));
+						}
+						Targets::Config {
+							allow,
+							deny,
+						} => {
+							if let Some(config) = allow {
+								match config {
+									TargetsConfig::Bool(experimental) => match experimental {
+										true => {
+											capabilities = capabilities
+												.with_experimental(capabilities::Targets::All);
+										}
+										false => {
+											capabilities = capabilities
+												.with_experimental(capabilities::Targets::None);
+										}
+									},
+									TargetsConfig::Array(set) => {
+										capabilities = capabilities
+											.with_experimental(process_targets!(set));
+									}
+								}
+							}
+
+							if let Some(config) = deny {
+								match config {
+									TargetsConfig::Bool(experimental) => match experimental {
+										true => {
+											capabilities = capabilities.without_experimental(
+												capabilities::Targets::All,
+											);
+										}
+										false => {
+											capabilities = capabilities.without_experimental(
+												capabilities::Targets::None,
+											);
+										}
+									},
+									TargetsConfig::Array(set) => {
+										capabilities = capabilities
+											.without_experimental(process_targets!(set));
 									}
 								}
 							}
