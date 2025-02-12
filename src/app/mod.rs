@@ -132,7 +132,7 @@ impl SurrealWasmEngine {
 	}
 
 	pub async fn import(&self, input: String) -> Result<(), Error> {
-		self.0.kvs.import(&input, &self.0.session).await?;
+		self.0.kvs.import(&input, self.0.session().as_ref()).await?;
 
 		Ok(())
 	}
