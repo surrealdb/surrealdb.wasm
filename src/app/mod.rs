@@ -11,8 +11,8 @@ use opt::endpoint::Options;
 use serde_wasm_bindgen::from_value;
 use surrealdb::dbs::Notification;
 use surrealdb::dbs::Session;
-use surrealdb::kvs::Datastore;
 use surrealdb::kvs::export::Config;
+use surrealdb::kvs::Datastore;
 use surrealdb::rpc::format::cbor;
 use surrealdb::rpc::RpcProtocolV1;
 use surrealdb::rpc::RpcProtocolV2;
@@ -129,6 +129,12 @@ impl SurrealWasmEngine {
 		let result = String::from_utf8(buffer.concat().into()).map_err(|e| e.to_string())?;
 
 		Ok(result)
+	}
+
+	pub async fn import(&self, input: String) -> Result<(), Error> {
+		self.0.kvs.import(&input, &self.0.session).await?;
+
+		Ok(())
 	}
 
 	pub fn version() -> Result<String, Error> {
