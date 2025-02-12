@@ -1,9 +1,10 @@
-use std::collections::BTreeMap;
+use std::sync::Arc;
 use std::time::Duration;
 
 mod opt;
 mod types;
 
+use arc_swap::ArcSwap;
 use cbor::Cbor;
 use futures::StreamExt;
 use opt::endpoint::Options;
@@ -13,7 +14,8 @@ use surrealdb::dbs::Session;
 use surrealdb::kvs::export::Config;
 use surrealdb::kvs::Datastore;
 use surrealdb::rpc::format::cbor;
-use surrealdb::rpc::method::Method;
+use surrealdb::rpc::RpcProtocolV1;
+use surrealdb::rpc::RpcProtocolV2;
 use surrealdb::rpc::{Data, RpcContext};
 use surrealdb::sql::{Object, Value};
 use types::TsConnectionOptions;
@@ -23,6 +25,7 @@ use wasm_bindgen::JsValue;
 use wasm_streams::readable::sys;
 use wasm_streams::ReadableStream;
 use web_sys::js_sys::Uint8Array;
+use tokio::sync::Semaphore;
 
 pub use crate::err::Error;
 
@@ -33,9 +36,12 @@ pub struct SurrealWasmEngine(SurrealWasmEngineInner);
 impl SurrealWasmEngine {
 	pub async fn execute(&mut self, data: Uint8Array) -> Result<Uint8Array, Error> {
 		let in_data = cbor::req(data.to_vec()).map_err(|e| e.to_string())?;
-		let res = self
-			.0
-			.execute(Method::parse(in_data.method), in_data.params)
+		let res = RpcContext::execute(
+			&self.0, 
+			in_data.version, 
+			in_data.method, 
+			in_data.params
+		)
 			.await
 			.map_err(|e| e.to_string())?;
 		println!("{:?}", res);
@@ -89,10 +95,12 @@ impl SurrealWasmEngine {
 				.with_strict_mode(opts.strict.map_or(Default::default(), |s| s)),
 		};
 
+		let session = Session::default().with_rt(true);
+
 		let inner = SurrealWasmEngineInner {
-			kvs,
-			session: Session::default().with_rt(true),
-			vars: Default::default(),
+			kvs: Arc::new(kvs),
+			session: ArcSwap::new(Arc::new(session)),
+			lock: Arc::new(Semaphore::new(1)),
 		};
 
 		Ok(SurrealWasmEngine(inner))
@@ -106,10 +114,10 @@ impl SurrealWasmEngine {
 				let in_config = cbor::parse_value(config.to_vec()).map_err(|e| e.to_string())?;
 				let config = Config::try_from(&in_config).map_err(|e| e.to_string())?;
 
-				self.0.kvs.export_with_config(&self.0.session, tx, config).await?.await?;
+				self.0.kvs.export_with_config(self.0.session().as_ref(), tx, config).await?.await?;
 			}
 			None => {
-				self.0.kvs.export(&self.0.session, tx).await?.await?;
+				self.0.kvs.export(self.0.session().as_ref(), tx).await?.await?;
 			}
 		};
 
@@ -124,7 +132,7 @@ impl SurrealWasmEngine {
 	}
 
 	pub async fn import(&self, input: String) -> Result<(), Error> {
-		self.0.kvs.import(&input, &self.0.session).await?;
+		self.0.kvs.import(&input, self.0.session().as_ref()).await?;
 
 		Ok(())
 	}
@@ -135,9 +143,9 @@ impl SurrealWasmEngine {
 }
 
 struct SurrealWasmEngineInner {
-	pub kvs: Datastore,
-	pub session: Session,
-	pub vars: BTreeMap<String, Value>,
+	pub kvs: Arc<Datastore>,
+	pub lock: Arc<Semaphore>,
+	pub session: ArcSwap<Session>,
 }
 
 impl RpcContext for SurrealWasmEngineInner {
@@ -145,20 +153,16 @@ impl RpcContext for SurrealWasmEngineInner {
 		&self.kvs
 	}
 
-	fn session(&self) -> &Session {
-		&self.session
+	fn lock(&self) -> Arc<Semaphore> {
+		self.lock.clone()
 	}
 
-	fn session_mut(&mut self) -> &mut Session {
-		&mut self.session
+	fn session(&self) -> Arc<Session> {
+		self.session.load_full()
 	}
-
-	fn vars(&self) -> &BTreeMap<String, Value> {
-		&self.vars
-	}
-
-	fn vars_mut(&mut self) -> &mut BTreeMap<String, Value> {
-		&mut self.vars
+	
+	fn set_session(&self, session: Arc<Session>) {
+		self.session.store(session);
 	}
 
 	fn version_data(&self) -> Data {
@@ -173,3 +177,6 @@ impl RpcContext for SurrealWasmEngineInner {
 		async { () }
 	}
 }
+
+impl RpcProtocolV1 for SurrealWasmEngineInner {}
+impl RpcProtocolV2 for SurrealWasmEngineInner {}
