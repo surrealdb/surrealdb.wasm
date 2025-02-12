@@ -211,6 +211,10 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions): Engines {
 			return this.db.export(options ? new Uint8Array(this.encodeCbor(options)) : undefined);
 		}
 
+		import(input: string): Promise<void> {
+			return this.db.import(input);
+		}
+
     }
 
     return {
