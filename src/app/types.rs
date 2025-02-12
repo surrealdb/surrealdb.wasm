@@ -17,6 +17,7 @@ const ITEXT_STYLE: &'static str = r#"
 			live_query_notifications?: boolean;
 			functions?: boolean | string[] | CapabilitiesAllowDenyList;
 			network_targets?: boolean | string[] | CapabilitiesAllowDenyList;
+			experimental?: boolean | string[] | CapabilitiesAllowDenyList;
 		}
 	}
 "#;
