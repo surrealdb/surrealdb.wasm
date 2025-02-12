@@ -39,6 +39,8 @@ wasm-bindgen-futures = "0.4.45"
 wasm-streams = "0.4.0"
 web-sys = { version = "0.3.69", features = ["console"] }
 channel = { version = "2.3.1", package = "async-channel" }
+tokio = "1.43.0"
+arc-swap = "1.7.1"
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.41"
