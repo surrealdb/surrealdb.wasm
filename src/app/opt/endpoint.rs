@@ -57,10 +57,10 @@ impl TryFrom<CapabilitiesConfig> for capabilities::Capabilities {
 	type Error = Error;
 
 	fn try_from(config: CapabilitiesConfig) -> Result<Self, Self::Error> {
-		match config {
-			CapabilitiesConfig::Bool(true) => Ok(Self::all()),
+		let caps = match config {
+			CapabilitiesConfig::Bool(true) => Self::all(),
 			CapabilitiesConfig::Bool(false) => {
-				Ok(Self::default().with_functions(capabilities::Targets::None))
+				Self::default().with_functions(capabilities::Targets::None)
 			}
 			CapabilitiesConfig::Capabilities {
 				scripting,
@@ -269,8 +269,16 @@ impl TryFrom<CapabilitiesConfig> for capabilities::Capabilities {
 					}
 				}
 
-				Ok(capabilities)
+				capabilities
 			}
-		}
+		};
+
+		Ok(
+			caps
+				// Always allow arbitrary quering in the WASM SDK,
+				// There is no use in configuring that here
+				.with_arbitrary_query(capabilities::Targets::All)
+				.without_arbitrary_query(capabilities::Targets::None)
+		)
 	}
 }
