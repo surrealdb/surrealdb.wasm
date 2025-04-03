@@ -8,6 +8,7 @@ import {
     ConnectionStatus,
     ConnectionUnavailable,
     AbstractEngine,
+    EngineAuth,
     UnexpectedConnectionError,
     type EngineEvents,
     type RpcRequest,
@@ -67,6 +68,7 @@ export function surrealdbWasmEngines(opts?: ConnectionOptions): Engines {
                 );
 
                 this.db = db;
+				await this.context.prepare?.(new EngineAuth(this))
                 this.setStatus(ConnectionStatus.Connected);
 
                 this.reader = (async () => {
