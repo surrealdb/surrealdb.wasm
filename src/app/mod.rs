@@ -18,6 +18,7 @@ use surrealdb::rpc::RpcProtocolV1;
 use surrealdb::rpc::RpcProtocolV2;
 use surrealdb::rpc::{Data, RpcContext};
 use surrealdb::sql::{Object, Value};
+use tokio::sync::Semaphore;
 use types::TsConnectionOptions;
 use uuid::Uuid;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -25,7 +26,6 @@ use wasm_bindgen::JsValue;
 use wasm_streams::readable::sys;
 use wasm_streams::ReadableStream;
 use web_sys::js_sys::Uint8Array;
-use tokio::sync::Semaphore;
 
 pub use crate::err::Error;
 
@@ -36,16 +36,12 @@ pub struct SurrealWasmEngine(SurrealWasmEngineInner);
 impl SurrealWasmEngine {
 	pub async fn execute(&mut self, data: Uint8Array) -> Result<Uint8Array, Error> {
 		let in_data = cbor::req(data.to_vec()).map_err(|e| e.to_string())?;
-		let res = RpcContext::execute(
-			&self.0, 
-			in_data.version, 
-			in_data.method, 
-			in_data.params
-		)
+		let res = RpcContext::execute(&self.0, in_data.version, in_data.method, in_data.params)
 			.await
 			.map_err(|e| e.to_string())?;
 		println!("{:?}", res);
-		let out = cbor::res(res).map_err(|e| e.to_string())?;
+		let value: Value = res.try_into()?;
+		let out = cbor::res(value).map_err(|e| e.to_string())?;
 		Ok(out.as_slice().into())
 	}
 
@@ -160,7 +156,7 @@ impl RpcContext for SurrealWasmEngineInner {
 	fn session(&self) -> Arc<Session> {
 		self.session.load_full()
 	}
-	
+
 	fn set_session(&self, session: Arc<Session>) {
 		self.session.store(session);
 	}
