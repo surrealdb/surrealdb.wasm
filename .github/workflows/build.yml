@@ -1,5 +1,8 @@
 name: Create test build
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:
