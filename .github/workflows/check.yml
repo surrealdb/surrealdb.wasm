@@ -33,3 +33,5 @@ jobs:
 
       - name: Build & Bundle
         run: pnpm build
+        env:
+          RUSTFLAGS: --cfg getrandom_backend="wasm_js"
