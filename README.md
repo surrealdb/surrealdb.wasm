@@ -16,8 +16,6 @@
     <a href="https://surrealdb.com/docs/sdk/javascript/engines/wasm"><img src="https://img.shields.io/badge/docs-view-44cc11.svg?style=flat-square"></a>
     &nbsp;
     <a href="https://www.npmjs.com/package/@surrealdb/wasm"><img src="https://img.shields.io/npm/v/@surrealdb/wasm?style=flat-square"></a>
-    &nbsp;
-    <a href="https://www.npmjs.com/package/@surrealdb/wasm"><img src="https://img.shields.io/npm/dm/@surrealdb/wasm?style=flat-square"></a>
 </p>
 
 <p align="center">
@@ -30,49 +28,10 @@
     <a href="https://www.youtube.com/@SurrealDB"><img src="https://img.shields.io/badge/youtube-subscribe-fc1c1c.svg?style=flat-square"></a>
 </p>
 
-# @surrealdb/wasm
+# surrealdb.wasm
 
 A WebAssembly engine for the SurrealDB [JavaScript SDK](https://github.com/surrealdb/surrealdb.js).
 
-This library is a plugin for the SurrealDB JavaScript SDK, which can be used to run SurrealDB as an embedded database within a browser environment, not server side environments.
+The code for this engine has been moved into the [SurrealDB Javascript SDK](https://github.com/surrealdb/surrealdb.js) repository.
 
-It enables SurrealDB to be run in-memory, or to persist data by running on top of IndexedDB. It allows for a consistent JavaScript and TypeScript API when using the `surrealdb.js` library by adding support for embedded storage engines (`memory`, `indxdb`) alongside the remote connection protocols (`http`, `https`, `ws`, `wss`).
-
-This library works with ES modules (`import`), not CommonJS (`require`).
-
-## Example usage
-
-```js
-import { Surreal } from "surrealdb";
-import { surrealdbWasmEngines } from "@surrealdb/wasm";
-
-// Enable the WebAssembly engines
-const db = new Surreal({
-    engines: surrealdbWasmEngines(),
-});
-
-// Now we can start SurrealDB as an in-memory database
-await db.connect("mem://");
-// Or we can start a persisted IndexedDB database
-await db.connect("indxdb://demo");
-
-// Now use the JavaScript SDK as normal.
-```
-
-## Usage with Vite
-
-When using [Vite](https://vitejs.dev/) the following configuration is recommended to be placed in your `vite.config.ts`
-
-```js
-optimizeDeps: {
-    exclude: ["@surrealdb/wasm"],
-    esbuildOptions: {
-        target: "esnext",
-    },
-},
-esbuild: {
-    supported: {
-        "top-level-await": true
-    },
-}
-```
+To embed SurrealDB within WebAssembly in the browser, [view the documentation](https://github.com/surrealdb/surrealdb.js#embedding-surrealdb-in-the-browser).
